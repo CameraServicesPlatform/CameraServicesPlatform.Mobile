@@ -1,0 +1,9 @@
+1. cai android stuio : https://developer.android.com/studio?gad_source=1&gclid=CjwKCAiAjKu6BhAMEiwAx4UsAsfWSJMkQQg6g5aU4zjMyWNZDzwF1OAMm_j7xoleHWSJzlHubvQukRoC3GYQAvD_BwE&gclsrc=aw.ds
+2. clone :https://github.com/CameraServicesPlatform/CameraServicesPlatform.Mobile.git
+3. npm i
+4: To run your project, navigate to the directory and run one of the following npm commands.
+
+- cd CameraServicesPlatform.Mobile
+- npm run android
+- npm run ios # you need to use macOS to build the iOS project - use the Expo app if you need to do iOS development without a Mac     
+- npm run web
