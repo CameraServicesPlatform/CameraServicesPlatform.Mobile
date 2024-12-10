@@ -1,11 +1,11 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import Account from '../screens/Account';
-import AccountDetails from '../screens/AccountDetails';
-import Reviews from '../screens/Reviews';
-import OrderHistory from '../screens/OrderHistory';
-import Reports from '../screens/Reports';
-import SavedDataScreen from '../screens/SavedDataScreen';
+import Account from '../screens/account/Account';
+import AccountDetails from '../screens/account/AccountDetails';
+import Reviews from '../screens/account/Reviews';
+import OrderHistory from '../screens/account/OrderHistory';
+import Reports from '../screens/account/Reports';
+import SavedDataScreen from '../screens/account/SavedDataScreen';
 const Stack = createStackNavigator();
 
 const AccountStack = () => {

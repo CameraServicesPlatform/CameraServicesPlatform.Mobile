@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Import icon trái tim
-import ProductCard from '../components/RentalProductCard';
-import ProductDetailModal from '../components/RentalProductDetailModal';
+import ProductCard from '../../components/RentalProductCard';
+import ProductDetailModal from '../../components/RentalProductDetailModal';
 
 const RentalProducts = ({ navigation }) => {
     const [filter, setFilter] = useState('');

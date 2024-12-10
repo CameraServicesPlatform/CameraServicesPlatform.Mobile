@@ -1,11 +1,11 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import SaleProduct from '../screens/SaleProduct';
-import OrderProductSale from '../screens/OrderProductSale';
-import ShippingMethod from '../screens/ShippingMethod';
-import Voucher from '../screens/Voucher';
-import ReviewOrder from '../screens/ReviewOrder'; // Thêm màn hình mới
-import OrderConfirmation from '../screens/OrderConfirmation';
+import SaleProduct from '../screens/order product sale/SaleProduct';
+import OrderProductSale from '../screens/order product sale/OrderProductSale';
+import ShippingMethod from '../screens/order product sale/ShippingMethod';
+import Voucher from '../screens/order product sale/Voucher';
+import ReviewOrder from '../screens/order product sale/ReviewOrder'; // Thêm màn hình mới
+import OrderConfirmation from '../screens/order product sale/OrderConfirmation';
 const Stack = createStackNavigator();
 
 const ProductSaleStack = () => {

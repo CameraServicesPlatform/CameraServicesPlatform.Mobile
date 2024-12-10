@@ -9,7 +9,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import Supplier from './src/screens/Supplier';
 import Category from './src/screens/Category';
-import RentalProduct from './src/screens/RentalProducts';
+import RentalProduct from './src/stacks/ProductRentalStack';
 import Policy from './src/screens/Policy';
 import Contact from './src/screens/Contact';
 import Login from './src/screens/Login';

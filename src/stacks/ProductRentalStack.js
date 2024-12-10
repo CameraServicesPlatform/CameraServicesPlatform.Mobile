@@ -1,18 +1,18 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import ReantalProduct from '../screens/ReantalProduct';
-import OrderProductReantal from '../screens/OrderProductReantal';
-import ShippingMethod from '../screens/ShippingMethod';
-import Voucher from '../screens/Voucher';
-import ReviewOrder from '../screens/ReviewOrder'; // Thêm màn hình mới
-import OrderConfirmation from '../screens/OrderConfirmation';
+import ReantalProduct from '../screens/order product rental/RentalProducts';
+import OrderProductRental from '../screens/order product rental/OrderProductRental';
+import ShippingMethod from '../screens/order product rental/ShippingMethod';
+import Voucher from '../screens/order product rental/Voucher';
+import ReviewOrder from '../screens/order product rental/ReviewOrder'; // Thêm màn hình mới
+import OrderConfirmation from '../screens/order product rental/OrderConfirmation';
 const Stack = createStackNavigator();
 
 const ProductReantalStack = () => {
   return (
     <Stack.Navigator initialRouteName="ReantalProduct">
       <Stack.Screen name="ReantalProduct" component={ReantalProduct} options={{ headerShown: true }} />
-      <Stack.Screen name="OrderProductReantal" component={OrderProductReantal} options={{ headerShown: true }} />
+      <Stack.Screen name="OrderProductRental" component={OrderProductRental} options={{ headerShown: true }} />
       <Stack.Screen name="ShippingMethod" component={ShippingMethod} options={{ headerShown: true }} />
       <Stack.Screen name="Voucher" component={Voucher} options={{ headerShown: true }} />
       <Stack.Screen name="ReviewOrder" component={ReviewOrder} options={{ headerShown: true }} />

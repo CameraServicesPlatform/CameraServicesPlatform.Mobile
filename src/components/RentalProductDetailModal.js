@@ -7,10 +7,19 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Button,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const RentalProductDetailModal = ({ visible, item, onClose }) => {
+  const navigation = useNavigation(); // Lấy navigation từ context
+
   if (!item) return null;
+
+  const handleRentProduct = () => {
+    onClose(); // Đóng modal trước khi chuyển trang
+    navigation.navigate('OrderProductRental', { productID: item.productID });
+  };
 
   return (
     <Modal
@@ -71,6 +80,9 @@ const RentalProductDetailModal = ({ visible, item, onClose }) => {
               <Text style={styles.infoValue}>{item.rating || 0} ⭐</Text>
             </View>
           </ScrollView>
+
+          {/* Nút Thuê sản phẩm */}
+          <Button title="Thuê sản phẩm" onPress={handleRentProduct} />
         </View>
       </View>
     </Modal>
@@ -90,24 +102,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
+    elevation: 5,
   },
   closeButton: {
     position: 'absolute',
     top: 10,
     right: 10,
+    zIndex: 1,
   },
   closeText: {
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#ff0000',
   },
   productImage: {
     width: '100%',
     height: 200,
+    borderRadius: 10,
     marginBottom: 20,
   },
   productName: {
     fontSize: 20,
     fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 10,
   },
   scrollContent: {
