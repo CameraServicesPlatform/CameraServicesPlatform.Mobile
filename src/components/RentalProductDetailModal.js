@@ -8,17 +8,32 @@ import {
   ScrollView,
   Image,
   Button,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RentalProductDetailModal = ({ visible, item, onClose }) => {
   const navigation = useNavigation(); // Lấy navigation từ context
 
   if (!item) return null;
 
-  const handleRentProduct = () => {
-    onClose(); // Đóng modal trước khi chuyển trang
-    navigation.navigate('OrderProductRental', { productID: item.productID });
+  const handleRentProduct = async () => {
+    try {
+      const accountID = await AsyncStorage.getItem('accountId');
+      const token = await AsyncStorage.getItem('token');
+
+      if (!accountID || !token) {
+        Alert.alert('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để thuê sản phẩm.');
+        return;
+      }
+
+      onClose(); // Đóng modal trước khi chuyển trang
+      navigation.navigate('OrderProductRental', { productID: item.productID });
+    } catch (error) {
+      console.error('Error checking login status:', error);
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại sau.');
+    }
   };
 
   return (

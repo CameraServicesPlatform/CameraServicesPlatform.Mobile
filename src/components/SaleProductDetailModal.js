@@ -8,7 +8,9 @@ import {
   ScrollView,
   Image,
   Button,
+  Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const SaleProductDetailModal = ({ visible, item, onClose }) => {
@@ -16,7 +18,15 @@ const SaleProductDetailModal = ({ visible, item, onClose }) => {
 
   if (!item) return null;
 
-  const handleBuyProduct = () => {
+  const handleBuyProduct = async () => {
+    const accountID = await AsyncStorage.getItem('accountId');
+    const token = await AsyncStorage.getItem('token');
+
+    if (!accountID || !token) {
+      Alert.alert('Thông báo', 'Bạn cần đăng nhập để mua sản phẩm.');
+      return;
+    }
+
     onClose(); // Đóng modal trước khi chuyển trang
     navigation.navigate('OrderProductSale', { productID: item.productID });
   };
