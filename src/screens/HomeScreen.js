@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ProductCard from '../components/ProductCard';
 import ProductDetailModal from '../components/ProductDetailModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = ({ navigation }) => {
     const [filter, setFilter] = useState('');
-    const [pageSize, setPageSize] = useState(5);
+    const [pageSize, setPageSize] = useState(10);
     const [pageIndex, setPageIndex] = useState(1);
     const [allProducts, setAllProducts] = useState([]);
     const [products, setProducts] = useState([]);
@@ -17,7 +18,7 @@ const HomeScreen = ({ navigation }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const fetchAllProducts = async (currentFilter) => {
-        const apiUrl = `http://14.225.220.108:2602/product/get-product-by-name?filter=${currentFilter}`;
+        const apiUrl = `http://14.225.220.108:2602/product/get-product-by-name?filter=${encodeURIComponent(currentFilter)}`;
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
@@ -51,18 +52,43 @@ const HomeScreen = ({ navigation }) => {
     }, [pageIndex, pageSize, allProducts, totalCount]);
 
     useEffect(() => {
+        // Mỗi khi filter thay đổi, fetch lại toàn bộ dữ liệu
         fetchAllProducts(filter);
     }, [filter]);
 
-    const toggleFavorite = (item) => {
-        setFavorites((prevFavorites) => {
-            const isAlreadyFavorite = prevFavorites.some((fav) => fav.productID === item.productID);
-            if (isAlreadyFavorite) {
-                return prevFavorites.filter((fav) => fav.productID !== item.productID);
+    const addFavorite = async (item) => {
+        const accountID = await AsyncStorage.getItem('accountId');
+        if (!accountID) {
+            Alert.alert('Lỗi', 'Không tìm thấy thông tin tài khoản.');
+            return;
+        }
+
+        const payload = {
+            accountID: accountID,
+            productID: item.productID,
+        };
+
+        try {
+            const response = await fetch('http://14.225.220.108:2602/wishlist/create-wishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+            if (data.isSuccess) {
+                Alert.alert('Thành công', 'Đã thêm vào danh sách yêu thích.');
+                setFavorites((prevFavorites) => [...prevFavorites, item]);
+                navigation.navigate('Favorites', { reload: true });
             } else {
-                return [...prevFavorites, item];
+                Alert.alert('Cảm ơn bạn', 'Đây là sản phẩm yêu thích');
             }
-        });
+        } catch (error) {
+            console.error('Error adding to favorites:', error);
+            Alert.alert('Lỗi', 'Đã xảy ra lỗi khi thêm vào danh sách yêu thích.');
+        }
     };
 
     const showProductDetail = (item) => {
@@ -71,13 +97,13 @@ const HomeScreen = ({ navigation }) => {
     };
 
     const renderPagination = () => {
-        const pages = [];
-        const maxPageButtons = 3;
+        if (totalPages <= 1) return null;
 
+        const pages = [];
+        const maxPageButtons = 5;
         const startPage = Math.max(1, pageIndex - Math.floor(maxPageButtons / 2));
         const endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
 
-        // Nếu tổng số trang > 3, ta sẽ hiển thị ... khi cần.
         if (startPage > 1) {
             pages.push(
                 <Button
@@ -117,7 +143,7 @@ const HomeScreen = ({ navigation }) => {
             }
             pages.push(
                 <Button
-                    key={totalPages}
+                    key="last"
                     title={String(totalPages)}
                     onPress={() => setPageIndex(totalPages)}
                     color={pageIndex === totalPages ? 'blue' : 'gray'}
@@ -206,7 +232,7 @@ const HomeScreen = ({ navigation }) => {
                         <ProductCard
                             item={item}
                             isFavorite={favorites.some((fav) => fav.productID === item.productID)}
-                            onToggleFavorite={toggleFavorite}
+                            onToggleFavorite={() => addFavorite(item)} // Gọi addFavorite tại đây
                         />
                     </TouchableOpacity>
                 )}
@@ -218,7 +244,7 @@ const HomeScreen = ({ navigation }) => {
                 onClose={() => setIsModalVisible(false)}
             />
 
-            {totalPages > 1 && renderPagination()}
+            {renderPagination()}
 
             <TouchableOpacity
                 style={styles.favoritesButton}
