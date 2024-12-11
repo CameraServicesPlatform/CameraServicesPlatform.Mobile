@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native';
 
 // Import các màn hình
 import HomeScreen from './src/screens/HomeScreen';
@@ -14,99 +14,81 @@ import Policy from './src/screens/Policy';
 import Contact from './src/screens/Contact';
 import Login from './src/screens/Login';
 import SignUp from './src/screens/Signup';
-import AccountStack from './src/stacks/AccountStack'; // AccountStack quản lý các màn hình thuộc Account
-import ProductSaleStack from './src/stacks/ProductSaleStack'; // ProductSaleStack quản lý SaleProduct và OrderProductSale
+import AccountStack from './src/stacks/AccountStack';
+import ProductSaleStack from './src/stacks/ProductSaleStack';
 
 const Drawer = createDrawerNavigator();
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Kiểm tra token khi khởi chạy ứng dụng
   const checkLoginStatus = async () => {
     const token = await AsyncStorage.getItem('token');
-    setIsLoggedIn(!!token); // Nếu có token => Đã đăng nhập
+    setIsLoggedIn(!!token);
   };
 
   useEffect(() => {
     checkLoginStatus();
   }, []);
 
-  // Xử lý chức năng logout
   const handleLogout = async (navigation) => {
-    setIsLoggingOut(true); // Bắt đầu trạng thái đăng xuất
     try {
-      // Lấy dữ liệu trước khi xóa
-      const savedDataBeforeClear = await AsyncStorage.getItem('savedData');
-      console.log('Dữ liệu savedData trước khi xóa:', savedDataBeforeClear);
-  
-      // Xóa token và các dữ liệu tạm thời
       await AsyncStorage.multiRemove(['token', 'tempData', 'savedData']);
-  
-      // Kiểm tra lại sau khi xóa
-      const savedDataAfterClear = await AsyncStorage.getItem('savedData');
-      console.log('Dữ liệu savedData sau khi xóa:', savedDataAfterClear);
-  
-      setIsLoggedIn(false); // Cập nhật trạng thái đăng nhập
+      setIsLoggedIn(false);
       Alert.alert('Đăng xuất thành công!');
-      navigation.navigate('Home'); // Điều hướng về màn hình Home
+      navigation.navigate('Home');
     } catch (error) {
       console.error('Lỗi khi xóa dữ liệu:', error);
       Alert.alert('Lỗi', 'Không thể đăng xuất do lỗi hệ thống.');
-    } finally {
-      setIsLoggingOut(false); // Kết thúc trạng thái đăng xuất
     }
   };
-  
+
+  // Tùy chỉnh nội dung Drawer
+  const CustomDrawerContent = (props) => (
+    <DrawerContentScrollView {...props}>
+      {/* Thêm logo vào đầu Drawer */}
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('./src/images/image.png')} // Thay bằng URL hoặc require ảnh
+          style={styles.logo}
+        />
+      </View>
+      {/* Danh sách các mục Drawer */}
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+  );
 
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Home">
-        {/* Các màn hình công khai */}
-        <Drawer.Screen name="Home" component={HomeScreen} options={{ headerShown: true , title: "Trang chủ"}}  />
-        {/* <Drawer.Screen name="Supplier" component={Supplier} options={{ headerShown: true , title: "Nhà cung cấp"}} /> */}
-        <Drawer.Screen name="Category" component={Category} options={{ headerShown: true , title: "Danh mục"}} />
-        <Drawer.Screen name="RentalProduct" component={RentalProduct} options={{ headerShown: true , title: "Sản phẩm thuê"}} />
-        {/* Thêm ProductSaleStack */}
-        <Drawer.Screen
-          name="ProductSale"
-          component={ProductSaleStack}
-          options={{ headerShown: true, title: "Sản phẩm bán" }}
-        />
-        <Drawer.Screen name="Policy" component={Policy} options={{ headerShown: true , title: "Chính sách"}} />
-        <Drawer.Screen name="Favorites" component={SettingsScreen} options={{ headerShown: true , title: "Yêu thích"}} />
-        <Drawer.Screen name="Contact" component={Contact} options={{ headerShown: true , title: "Liên hệ"}} />
+      <Drawer.Navigator
+        initialRouteName="Home"
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+      >
+        <Drawer.Screen name="Home" component={HomeScreen} options={{ headerShown: true, title: 'Trang chủ' }} />
+        <Drawer.Screen name="Category" component={Category} options={{ headerShown: true, title: 'Danh mục' }} />
+        <Drawer.Screen name="RentalProduct" component={RentalProduct} options={{ headerShown: true, title: 'Sản phẩm thuê' }} />
+        <Drawer.Screen name="ProductSale" component={ProductSaleStack} options={{ headerShown: true, title: 'Sản phẩm bán' }} />
+        <Drawer.Screen name="Policy" component={Policy} options={{ headerShown: true, title: 'Chính sách' }} />
+        <Drawer.Screen name="Favorites" component={SettingsScreen} options={{ headerShown: true, title: 'Yêu thích' }} />
+        <Drawer.Screen name="Contact" component={Contact} options={{ headerShown: true, title: 'Liên hệ' }} />
 
-        {/* Hiển thị Login và SignUp khi chưa đăng nhập */}
         {!isLoggedIn && (
           <>
-            <Drawer.Screen
-              name="Login"
-              component={(props) => (
-                <Login {...props} onLoginSuccess={checkLoginStatus} />
-              )}
-              options={{ headerShown: true , title: "Đăng nhập"}}
-            />
-            <Drawer.Screen name="SignUp" component={SignUp} options={{ headerShown: true , title: "Đăng kí"}} />
+            <Drawer.Screen name="Login" component={(props) => <Login {...props} onLoginSuccess={checkLoginStatus} />} options={{ headerShown: true, title: 'Đăng nhập' }} />
+            <Drawer.Screen name="SignUp" component={SignUp} options={{ headerShown: true, title: 'Đăng kí' }} />
           </>
         )}
 
-        {/* Hiển thị AccountStack khi đã đăng nhập */}
         {isLoggedIn && (
           <>
-            <Drawer.Screen
-              name="Account"
-              component={AccountStack} // Sử dụng AccountStack để quản lý các màn hình con của Account
-              options={{ headerShown: true }}
-            />
+            <Drawer.Screen name="Account" component={AccountStack} options={{ headerShown: true }} />
             <Drawer.Screen
               name="Logout"
               component={({ navigation }) => {
                 useEffect(() => {
                   handleLogout(navigation);
                 }, []);
-                return null; // Không cần giao diện, chỉ cần thực thi logout
+                return null;
               }}
               options={{ headerShown: false }}
             />
@@ -116,3 +98,16 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingTop: 10,
+  },
+  logo: {
+    width: 300,
+    height: 100,
+
+  },
+});

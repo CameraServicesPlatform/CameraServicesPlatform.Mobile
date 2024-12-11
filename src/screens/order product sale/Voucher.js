@@ -66,7 +66,8 @@ const Voucher = ({ route, navigation }) => {
   };
 
   const handleNext = () => {
-    navigation.navigate('OrderConfirmation', {
+    // Chuyển sang ReviewOrder, kèm voucherID (nếu có)
+    navigation.navigate('ReviewOrder', {
       productID,
       shippingMethod,
       address,
@@ -74,10 +75,10 @@ const Voucher = ({ route, navigation }) => {
       endDate,
       returnDate,
       totalPrice,
-      voucherID: selectedVoucher ? selectedVoucher.vourcherID : '',
       durationUnit,
       durationValue,
-      supplierID
+      supplierID,
+      voucherID: selectedVoucher ? selectedVoucher.vourcherID : ''
     });
   };
 
