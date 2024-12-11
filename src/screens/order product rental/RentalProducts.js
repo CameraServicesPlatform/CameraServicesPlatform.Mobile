@@ -9,41 +9,56 @@ const RentalProducts = ({ navigation }) => {
     const [filter, setFilter] = useState('');
     const [pageSize, setPageSize] = useState(10);
     const [pageIndex, setPageIndex] = useState(1);
+    const [allProducts, setAllProducts] = useState([]);
     const [products, setProducts] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
-    const [favorites, setFavorites] = useState([]); // Danh sách sản phẩm yêu thích
-    const [selectedProduct, setSelectedProduct] = useState(null); // Sản phẩm được chọn
-    const [isModalVisible, setIsModalVisible] = useState(false); // Hiển thị modal
+    const [favorites, setFavorites] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
-    // Gọi API để lấy tổng số sản phẩm
-    const fetchTotalProducts = async () => {
-        const apiUrl = `http://14.225.220.108:2602/product/get-product-by-rent`;
-        try {
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-            if (data.isSuccess) {
-                setTotalCount(data.result.length); // Tổng số sản phẩm
-                setTotalPages(Math.ceil(data.result.length / pageSize)); // Tính tổng số trang
-                setProducts(data.result.slice(0, pageSize)); // Hiển thị trang đầu
-            }
-        } catch (error) {
-            console.error('Error fetching total products:', error);
+    const fetchAllProducts = async (currentFilter) => {
+        let apiUrl = `http://14.225.220.108:2602/product/get-product-by-rent`;
+        if (currentFilter && currentFilter.trim() !== '') {
+            apiUrl = `http://14.225.220.108:2602/product/get-product-by-rent?filter=${encodeURIComponent(currentFilter)}`;
         }
-    };
 
-    const fetchProducts = async () => {
-        const apiUrl = `http://14.225.220.108:2602/product/get-product-by-rent?pageIndex=${pageIndex}&pageSize=${pageSize}&filter=${filter}`;
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
             if (data.isSuccess) {
-                setProducts(data.result || []);
+                const fullProducts = data.result || [];
+                setAllProducts(fullProducts);
+                setTotalCount(fullProducts.length);
+                setTotalPages(Math.ceil(fullProducts.length / pageSize));
+                setPageIndex(1);
+            } else {
+                setAllProducts([]);
+                setTotalCount(0);
+                setTotalPages(1);
+                setPageIndex(1);
             }
         } catch (error) {
             console.error('Error fetching products:', error);
         }
     };
+
+    const updatePageProducts = () => {
+        const start = (pageIndex - 1) * pageSize;
+        const end = start + pageSize;
+        const currentPageProducts = allProducts.slice(start, end);
+        setProducts(currentPageProducts);
+    };
+
+    useEffect(() => {
+        updatePageProducts();
+        setTotalPages(Math.ceil(totalCount / pageSize));
+    }, [pageIndex, pageSize, allProducts, totalCount]);
+
+    // Mỗi khi filter thay đổi, fetch lại tất cả sản phẩm
+    useEffect(() => {
+        fetchAllProducts(filter);
+    }, [filter]);
 
     const addFavorite = async (item) => {
         const accountID = await AsyncStorage.getItem('accountId');
@@ -70,7 +85,7 @@ const RentalProducts = ({ navigation }) => {
             if (data.isSuccess) {
                 Alert.alert('Thành công', 'Đã thêm vào danh sách yêu thích.');
                 setFavorites((prevFavorites) => [...prevFavorites, item]);
-                navigation.navigate('Favorites', { reload: true }); // Thông báo SettingsScreen reload
+                navigation.navigate('Favorites', { reload: true });
             } else {
                 Alert.alert('Cảm ơn bạn', 'Đây là sản phẩm yêu thích');
             }
@@ -80,26 +95,37 @@ const RentalProducts = ({ navigation }) => {
         }
     };
 
-    useEffect(() => {
-        fetchTotalProducts();
-    }, []);
-
-    useEffect(() => {
-        if (totalCount > 0) {
-            fetchProducts();
-        }
-    }, [pageIndex, pageSize]);
-
     const showProductDetail = (item) => {
         setSelectedProduct(item);
         setIsModalVisible(true);
     };
 
     const renderPagination = () => {
+        if (totalPages <= 1) return null;
+
         const pages = [];
-        const maxPageButtons = 3; // Hiển thị tối đa 3 số trang
+        const maxPageButtons = 3;
         const startPage = Math.max(1, pageIndex - Math.floor(maxPageButtons / 2));
         const endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+        // Nếu startPage > 1 thì hiển thị trang 1 và ...
+        if (startPage > 1) {
+            pages.push(
+                <Button
+                    key="1"
+                    title="1"
+                    onPress={() => setPageIndex(1)}
+                    color={pageIndex === 1 ? 'blue' : 'gray'}
+                />
+            );
+            if (startPage > 2) {
+                pages.push(
+                    <Text key="dots-start" style={styles.paginationDots}>
+                        ...
+                    </Text>
+                );
+            }
+        }
 
         for (let i = startPage; i <= endPage; i++) {
             pages.push(
@@ -112,43 +138,67 @@ const RentalProducts = ({ navigation }) => {
             );
         }
 
-        return (
-            <View style={styles.pagination}>
+        // Nếu endPage < totalPages thì hiển thị ... và trang cuối
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                pages.push(
+                    <Text key="dots-end" style={styles.paginationDots}>
+                        ...
+                    </Text>
+                );
+            }
+            pages.push(
                 <Button
-                    title="First"
-                    onPress={() => setPageIndex(1)}
-                    disabled={pageIndex === 1}
-                />
-                <Button
-                    title="Back"
-                    onPress={() => setPageIndex(pageIndex - 1)}
-                    disabled={pageIndex === 1}
-                />
-                {pages}
-                <Button
-                    title="Next"
-                    onPress={() => setPageIndex(pageIndex + 1)}
-                    disabled={pageIndex === totalPages}
-                />
-                <Button
-                    title="Last"
+                    key={totalPages}
+                    title={String(totalPages)}
                     onPress={() => setPageIndex(totalPages)}
-                    disabled={pageIndex === totalPages}
+                    color={pageIndex === totalPages ? 'blue' : 'gray'}
                 />
+            );
+        }
+
+        return (
+            <View style={styles.paginationContainer}>
+                <View style={styles.pagination}>
+                    <TouchableOpacity
+                        style={[styles.navButton, pageIndex === 1 && styles.navButtonDisabled]}
+                        onPress={() => setPageIndex(1)}
+                        disabled={pageIndex === 1}
+                    >
+                        <Text style={styles.navButtonText}>{'<<<'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.navButton, pageIndex === 1 && styles.navButtonDisabled]}
+                        onPress={() => setPageIndex(pageIndex - 1)}
+                        disabled={pageIndex === 1}
+                    >
+                        <Text style={styles.navButtonText}>{'<'}</Text>
+                    </TouchableOpacity>
+
+                    {pages}
+
+                    <TouchableOpacity
+                        style={[styles.navButton, pageIndex === totalPages && styles.navButtonDisabled]}
+                        onPress={() => setPageIndex(pageIndex + 1)}
+                        disabled={pageIndex === totalPages}
+                    >
+                        <Text style={styles.navButtonText}>{'>'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.navButton, pageIndex === totalPages && styles.navButtonDisabled]}
+                        onPress={() => setPageIndex(totalPages)}
+                        disabled={pageIndex === totalPages}
+                    >
+                        <Text style={styles.navButtonText}>{'>>>'}</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         );
     };
 
-    const renderProduct = ({ item }) => (
-        <ProductCard
-            item={item}
-            isFavorite={favorites.some((fav) => fav.productID === item.productID)}
-            onToggleFavorite={() => addFavorite(item)}
-        />
-    );
-
     return (
         <View style={styles.container}>
+            {/* Thanh tìm kiếm */}
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
@@ -156,38 +206,58 @@ const RentalProducts = ({ navigation }) => {
                     value={filter}
                     onChangeText={setFilter}
                 />
-                <TouchableOpacity style={styles.searchButton} onPress={() => fetchProducts()}>
+                <TouchableOpacity style={styles.searchButton} onPress={() => fetchAllProducts(filter)}>
                     <Ionicons name="search" size={20} color="white" />
                 </TouchableOpacity>
             </View>
 
+            {/* Ô nhập pageSize */}
             <View style={styles.pageSizeContainer}>
                 <TextInput
                     style={styles.pageSizeInput}
                     placeholder="Page size"
                     value={String(pageSize)}
                     keyboardType="numeric"
-                    onChangeText={(text) => setPageSize(Number(text))}
+                    onChangeText={(text) => {
+                        const newSize = Number(text) || 10;
+                        setPageSize(newSize);
+                        setPageIndex(1);
+                    }}
                 />
-                <TouchableOpacity style={styles.setButton} onPress={() => fetchProducts()}>
+                <TouchableOpacity style={styles.setButton} onPress={() => {
+                    setTotalPages(Math.ceil(totalCount / pageSize));
+                    updatePageProducts();
+                }}>
                     <Text style={styles.setButtonText}>Set</Text>
                 </TouchableOpacity>
             </View>
 
+            {/* Danh sách sản phẩm */}
             <FlatList
                 data={products}
                 keyExtractor={(item) => item.productID}
-                renderItem={renderProduct}
+                renderItem={({ item }) => (
+                    <TouchableOpacity onPress={() => showProductDetail(item)}>
+                        <ProductCard
+                            item={item}
+                            isFavorite={favorites.some((fav) => fav.productID === item.productID)}
+                            onToggleFavorite={() => addFavorite(item)}
+                        />
+                    </TouchableOpacity>
+                )}
             />
 
+            {/* Hiển thị modal */}
             <ProductDetailModal
                 visible={isModalVisible}
                 item={selectedProduct}
                 onClose={() => setIsModalVisible(false)}
             />
 
+            {/* Thanh phân trang */}
             {renderPagination()}
 
+            {/* Nút chuyển đến danh sách yêu thích */}
             <TouchableOpacity
                 style={styles.favoritesButton}
                 onPress={() => navigation.navigate('Favorites', { favorites })}
@@ -197,6 +267,7 @@ const RentalProducts = ({ navigation }) => {
         </View>
     );
 };
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -255,10 +326,34 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
     },
+    paginationContainer: {
+        marginTop: 20,
+    },
     pagination: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    paginationDots: {
+        fontSize: 16,
+        color: 'gray',
+        paddingHorizontal: 5,
+        textAlignVertical: 'center',
+        alignSelf: 'center',
+    },
+    navButton: {
+        marginHorizontal: 4,
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: '#007bff',
+    },
+    navButtonDisabled: {
+        backgroundColor: '#ccc',
+    },
+    navButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
     favoritesButton: {
         position: 'absolute',
@@ -278,6 +373,4 @@ const styles = StyleSheet.create({
     },
 });
 
-
-    
-    export default RentalProducts;
+export default RentalProducts;
