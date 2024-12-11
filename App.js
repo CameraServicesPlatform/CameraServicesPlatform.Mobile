@@ -64,19 +64,19 @@ export default function App() {
     <NavigationContainer>
       <Drawer.Navigator initialRouteName="Home">
         {/* Các màn hình công khai */}
-        <Drawer.Screen name="Home" component={HomeScreen} options={{ headerShown: true }} />
-        <Drawer.Screen name="Supplier" component={Supplier} options={{ headerShown: true }} />
-        <Drawer.Screen name="Category" component={Category} options={{ headerShown: true }} />
-        <Drawer.Screen name="RentalProduct" component={RentalProduct} options={{ headerShown: true }} />
+        <Drawer.Screen name="Home" component={HomeScreen} options={{ headerShown: true , title: "Trang chủ"}}  />
+        <Drawer.Screen name="Supplier" component={Supplier} options={{ headerShown: true , title: "Nhà cung cấp"}} />
+        <Drawer.Screen name="Category" component={Category} options={{ headerShown: true , title: "Danh mục"}} />
+        <Drawer.Screen name="RentalProduct" component={RentalProduct} options={{ headerShown: true , title: "Sản phẩm thuê"}} />
         {/* Thêm ProductSaleStack */}
         <Drawer.Screen
           name="ProductSale"
           component={ProductSaleStack}
-          options={{ headerShown: true }}
+          options={{ headerShown: true, title: "Sản phẩm bán" }}
         />
-        <Drawer.Screen name="Policy" component={Policy} options={{ headerShown: true }} />
-        <Drawer.Screen name="Favorites" component={SettingsScreen} options={{ headerShown: true }} />
-        <Drawer.Screen name="Contact" component={Contact} options={{ headerShown: true }} />
+        <Drawer.Screen name="Policy" component={Policy} options={{ headerShown: true , title: "Chính sách"}} />
+        <Drawer.Screen name="Favorites" component={SettingsScreen} options={{ headerShown: true , title: "Yêu thích"}} />
+        <Drawer.Screen name="Contact" component={Contact} options={{ headerShown: true , title: "Liên lệ"}} />
 
         {/* Hiển thị Login và SignUp khi chưa đăng nhập */}
         {!isLoggedIn && (
@@ -86,9 +86,9 @@ export default function App() {
               component={(props) => (
                 <Login {...props} onLoginSuccess={checkLoginStatus} />
               )}
-              options={{ headerShown: true }}
+              options={{ headerShown: true , title: "Đăng nhập"}}
             />
-            <Drawer.Screen name="SignUp" component={SignUp} options={{ headerShown: true }} />
+            <Drawer.Screen name="SignUp" component={SignUp} options={{ headerShown: true , title: "Đăng kí"}} />
           </>
         )}
 
