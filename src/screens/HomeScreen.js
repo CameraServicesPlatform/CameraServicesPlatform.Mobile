@@ -97,23 +97,23 @@ const HomeScreen = ({ navigation }) => {
         return (
             <View style={styles.pagination}>
                 <Button
-                    title="trang đầu"
+                    title="TRANG ĐẦU"
                     onPress={() => setPageIndex(1)}
                     disabled={pageIndex === 1}
                 />
                 <Button
-                    title="quay lại"
+                    title="QUAY LẠI"
                     onPress={() => setPageIndex(pageIndex - 1)}
                     disabled={pageIndex === 1}
                 />
                 {pages}
                 <Button
-                    title="tiếp"
+                    title="TIẾP"
                     onPress={() => setPageIndex(pageIndex + 1)}
                     disabled={pageIndex === totalPages}
                 />
                 <Button
-                    title="trang cuối"
+                    title="TRANG CUỐI"
                     onPress={() => setPageIndex(totalPages)}
                     disabled={pageIndex === totalPages}
                 />
