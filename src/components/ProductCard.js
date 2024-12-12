@@ -23,13 +23,27 @@ const ProductCard = ({ item, isFavorite, onToggleFavorite }) => {
       {/* Thông tin sản phẩm */}
       <View style={styles.productDetails}>
         <Text style={styles.productName}>{item.productName}</Text>
-        <Text style={styles.productText}>Giá mua: {item.priceBuy || 'Không có'} đ</Text>
-        <Text style={styles.productText}>Giá thuê giờ: {item.pricePerHour || 'Không có'} đ</Text>
-        <Text style={styles.productText}>Ngày sản xuất: {item.dateOfManufacture || 'Không có'}</Text>
-        <Text style={styles.productText}>Giá thuê ngày: {item.pricePerDay || 'Không có'} đ</Text>
-        <Text style={styles.productText}>Giá thuê tuần: {item.pricePerWeek || 'Không có'} đ</Text>
-        <Text style={styles.productText}>Giá thuê tháng: {item.pricePerMonth || 'Không có'} đ</Text>
-        <Text style={styles.productText}>Đánh giá: {item.rating || 0} ⭐</Text>
+        <Text style={styles.productText}>
+          Giá mua: {item.priceBuy ? `${item.priceBuy.toLocaleString()} đ` : 'Không có'}
+        </Text>
+        <Text style={styles.productText}>
+          Giá thuê giờ: {item.pricePerHour ? `${item.pricePerHour.toLocaleString()} đ` : 'Không có'}
+        </Text>
+        <Text style={styles.productText}>
+          Ngày sản xuất: {item.dateOfManufacture || 'Không có'}
+        </Text>
+        <Text style={styles.productText}>
+          Giá thuê ngày: {item.pricePerDay ? `${item.pricePerDay.toLocaleString()} đ` : 'Không có'}
+        </Text>
+        <Text style={styles.productText}>
+          Giá thuê tuần: {item.pricePerWeek ? `${item.pricePerWeek.toLocaleString()} đ` : 'Không có'}
+        </Text>
+        <Text style={styles.productText}>
+          Giá thuê tháng: {item.pricePerMonth ? `${item.pricePerMonth.toLocaleString()} đ` : 'Không có'}
+        </Text>
+        <Text style={styles.productText}>
+          Đánh giá: {item.rating || 0} ⭐
+        </Text>
       </View>
     </View>
   );
@@ -39,11 +53,17 @@ const styles = StyleSheet.create({
   productContainer: {
     flexDirection: 'row',
     marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
+    borderRadius: 10,
+    backgroundColor: '#fff',
     overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
     position: 'relative',
+    padding: 10,
+    alignItems: 'center',
   },
   heartIcon: {
     position: 'absolute',
@@ -54,19 +74,23 @@ const styles = StyleSheet.create({
   productImage: {
     width: 100,
     height: 100,
+    borderRadius: 8,
+    marginRight: 15,
   },
   productDetails: {
     flex: 1,
-    padding: 10,
+    justifyContent: 'center',
   },
   productName: {
-    fontWeight: 'bold',
+    fontWeight: '600',
     fontSize: 16,
     marginBottom: 5,
+    color: '#333',
   },
   productText: {
     fontSize: 14,
-    marginBottom: 2,
+    marginBottom: 4,
+    color: '#555',
   },
 });
 

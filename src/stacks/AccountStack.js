@@ -6,6 +6,8 @@ import Reviews from '../screens/account/Reviews';
 import OrderHistory from '../screens/account/OrderHistory';
 import Reports from '../screens/account/Reports';
 import SavedDataScreen from '../screens/account/SavedDataScreen';
+import UpdateAccount from '../screens/account/UpdateAccount';
+
 const Stack = createStackNavigator();
 
 const AccountStack = () => {
@@ -17,6 +19,7 @@ const AccountStack = () => {
       <Stack.Screen name="OrderHistory" component={OrderHistory} options={{ title: 'Lịch sử các đơn hàng' }} />
       <Stack.Screen name="SavedDataScreen" component={SavedDataScreen} options={{ title: 'Các đơn hàng giao đang giao dịch' }} />
       <Stack.Screen name="Reports" component={Reports} options={{ title: 'Báo cáo' }} />
+      <Stack.Screen name="UpdateAccount" component={UpdateAccount} options={{ title: 'Cập nhật thông tin tài khoản' }} />
     </Stack.Navigator>
   );
 };

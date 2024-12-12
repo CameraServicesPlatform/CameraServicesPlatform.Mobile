@@ -24,6 +24,7 @@ const ShippingMethod = ({ route, navigation }) => {
       productID,
       shippingMethod,
       address: shippingMethod === 1 ? address.trim() : '',
+      
     });
   };
 
