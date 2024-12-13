@@ -53,7 +53,7 @@ const SaleProductDetailModal = ({ visible, item, onClose }) => {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá mua:</Text>
-              <Text style={styles.infoValue}>{item.priceBuy || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>{item.priceBuy.toLocaleString() || 'Không có'} đ</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Đánh giá:</Text>
