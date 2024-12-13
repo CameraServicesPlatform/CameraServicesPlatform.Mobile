@@ -18,21 +18,26 @@ const RentalProducts = ({ navigation }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const fetchAllProducts = async (currentFilter) => {
-        let apiUrl = `http://14.225.220.108:2602/product/get-product-by-rent`;
+        let apiUrl = `http://14.225.220.108:2602/product/get-all-product`;
         if (currentFilter && currentFilter.trim() !== '') {
-            apiUrl = `http://14.225.220.108:2602/product/get-product-by-rent?filter=${encodeURIComponent(currentFilter)}`;
+            apiUrl = `http://14.225.220.108:2602/product/get-product-by-name?filter=${encodeURIComponent(currentFilter)}`;
         }
-
+    
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
             if (data.isSuccess) {
                 const fullProducts = data.result || [];
-                setAllProducts(fullProducts);
-                setTotalCount(fullProducts.length);
-                setTotalPages(Math.ceil(fullProducts.length / pageSize));
+                // Lọc các sản phẩm có status = 0
+                const filteredProducts = fullProducts.filter((product) => product.status === 1);
+    
+                // Cập nhật trạng thái và phân trang
+                setAllProducts(filteredProducts);
+                setTotalCount(filteredProducts.length);
+                setTotalPages(Math.ceil(filteredProducts.length / pageSize));
                 setPageIndex(1);
             } else {
+                // Nếu không thành công, đặt giá trị mặc định
                 setAllProducts([]);
                 setTotalCount(0);
                 setTotalPages(1);
@@ -42,6 +47,7 @@ const RentalProducts = ({ navigation }) => {
             console.error('Error fetching products:', error);
         }
     };
+    
 
     const updatePageProducts = () => {
         const start = (pageIndex - 1) * pageSize;
