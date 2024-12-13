@@ -44,23 +44,23 @@ const ProductDetailModal = ({ visible, item, onClose }) => {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Cọc sản phẩm:</Text>
-              <Text style={styles.infoValue}>{item.depositProduct || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>{item.depositProduct.toLocaleString() || 'Không có'} đ</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá (Thuê)/giờ:</Text>
-              <Text style={styles.infoValue}>{item.pricePerHour || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>{item.pricePerHour.toLocaleString() || 'Không có'} đ</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá (Thuê)/ngày:</Text>
-              <Text style={styles.infoValue}>{item.pricePerDay || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>{item.pricePerDay.toLocaleString() || 'Không có'} đ</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá (Thuê)/tuần:</Text>
-              <Text style={styles.infoValue}>{item.pricePerWeek || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>{item.pricePerWeek.toLocaleString() || 'Không có'} đ</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá (Thuê)/tháng:</Text>
-              <Text style={styles.infoValue}>{item.pricePerMonth || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>{item.pricePerMonth.toLocaleString() || 'Không có'} đ</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Thương hiệu:</Text>
