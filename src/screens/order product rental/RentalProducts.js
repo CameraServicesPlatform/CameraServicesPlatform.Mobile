@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import ProductCard from '../../components/RentalProductCard';
+import RentalProductCard from '../../components/RentalProductCard';
 import ProductDetailModal from '../../components/RentalProductDetailModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -244,7 +244,7 @@ const RentalProducts = ({ navigation }) => {
                 keyExtractor={(item) => item.productID}
                 renderItem={({ item }) => (
                     <TouchableOpacity onPress={() => showProductDetail(item)}>
-                        <ProductCard
+                        <RentalProductCard
                             item={item}
                             isFavorite={favorites.some((fav) => fav.productID === item.productID)}
                             onToggleFavorite={() => addFavorite(item)}

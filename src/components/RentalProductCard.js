@@ -23,12 +23,11 @@ const RentalProductCard = ({ item, isFavorite, onToggleFavorite }) => {
       {/* Thông tin sản phẩm */}
       <View style={styles.productDetails}>
         <Text style={styles.productName}>{item.productName}</Text>
-        <Text style={styles.productText}>Giá mua: {item.priceBuy || 'Không có'} đ</Text>
-        <Text style={styles.productText}>Giá thuê giờ: {item.pricePerHour || 'Không có'} đ</Text>
         <Text style={styles.productText}>Ngày sản xuất: {item.dateOfManufacture || 'Không có'}</Text>
-        <Text style={styles.productText}>Giá thuê ngày: {item.pricePerDay || 'Không có'} đ</Text>
-        <Text style={styles.productText}>Giá thuê tuần: {item.pricePerWeek || 'Không có'} đ</Text>
-        <Text style={styles.productText}>Giá thuê tháng: {item.pricePerMonth || 'Không có'} đ</Text>
+        <Text style={styles.productText}>Giá thuê giờ: {item.pricePerHour.toLocaleString() || 'Không có'} đ</Text>
+        <Text style={styles.productText}>Giá thuê ngày: {item.pricePerDay.toLocaleString() || 'Không có'} đ</Text>
+        <Text style={styles.productText}>Giá thuê tuần: {item.pricePerWeek.toLocaleString() || 'Không có'} đ</Text>
+        <Text style={styles.productText}>Giá thuê tháng: {item.pricePerMonth.toLocaleString() || 'Không có'} đ</Text>
         <Text style={styles.productText}>Đánh giá: {item.rating || 0} ⭐</Text>
       </View>
     </View>
