@@ -7,6 +7,7 @@ import OrderHistory from '../screens/account/OrderHistory';
 import Reports from '../screens/account/Reports';
 import SavedDataScreen from '../screens/account/SavedDataScreen';
 import UpdateAccount from '../screens/account/UpdateAccount';
+import OrderDetail from '../screens/account/OrderDetail';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,7 @@ const AccountStack = () => {
       <Stack.Screen name="SavedDataScreen" component={SavedDataScreen} options={{ title: 'Các đơn hàng giao đang giao dịch' }} />
       <Stack.Screen name="Reports" component={Reports} options={{ title: 'Báo cáo' }} />
       <Stack.Screen name="UpdateAccount" component={UpdateAccount} options={{ title: 'Cập nhật thông tin tài khoản' }} />
+      <Stack.Screen name="OrderDetail" component={OrderDetail} options={{ title: 'Thông tin đơn hang' }} />
     </Stack.Navigator>
   );
 };

@@ -21,7 +21,7 @@ const AccountDetails = ({ navigation }) => {
         const response = await fetch(
           `http://14.225.220.108:2602/account/get-account-by-userId/${storedAccountID}`,
           {
-            method: 'POST',
+            method: 'GET',
             headers: {
               'Content-Type': 'application/json',
             },

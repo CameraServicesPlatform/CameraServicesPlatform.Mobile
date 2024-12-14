@@ -1,78 +1,38 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Button } from 'react-native';
 
 const ShippingMethod = ({ route, navigation }) => {
   const { productID } = route.params || {};
-  const [shippingMethod, setShippingMethod] = useState(null); // 0: Nhận tại cửa hàng, 1: Giao hàng tận nơi
-  const [address, setAddress] = useState(''); // Địa chỉ giao hàng
-  const [error, setError] = useState(''); // Thông báo lỗi
 
   const handleNext = () => {
-    if (shippingMethod === null) {
-      setError('Vui lòng chọn phương thức giao hàng.');
-      return;
-    }
-  
-    if (shippingMethod === 1 && !address.trim()) {
-      setError('Vui lòng nhập địa chỉ giao hàng.');
-      return;
-    }
-  
-    // Xóa thông báo lỗi và chuyển tiếp
-    setError('');
+    // Chuyển tiếp sang màn hình Voucher, mặc định shippingMethod = 0 (Nhận tại cửa hàng)
     navigation.navigate('Voucher', {
       productID,
-      shippingMethod,
-      address: shippingMethod === 1 ? address.trim() : '',
-      startDate: route.params.startDate,       // Ngày giờ bắt đầu thuê
-      endDate: route.params.endDate,           // Ngày giờ kết thúc thuê
-      returnDate: route.params.returnDate,     // Ngày giờ trả hàng
-      totalPrice: route.params.totalPrice,     // Tổng giá tiền
-      durationUnit: route.params.durationUnit, // Đơn vị thời gian (hour, day, week, month)
-      durationValue: route.params.durationValue // Giá trị thời gian (số lượng tương ứng với đơn vị thời gian)
+      shippingMethod: 0,
+      address: '', // không cần nhập địa chỉ
+      startDate: route.params.startDate,
+      endDate: route.params.endDate,
+      returnDate: route.params.returnDate,
+      totalPrice: route.params.totalPrice,
+      durationUnit: route.params.durationUnit,
+      durationValue: route.params.durationValue,
     });
   };
-  
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Phương thức giao hàng</Text>
-
-      {/* Hiển thị thông báo lỗi */}
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-      {/* Chọn phương thức giao hàng */}
-      <View style={styles.optionsContainer}>
-        <Button
-          title="Nhận tại cửa hàng"
-          color={shippingMethod === 0 ? 'green' : 'gray'}
-          onPress={() => {
-            setShippingMethod(0);
-            setAddress(''); // Reset địa chỉ nếu chọn nhận tại cửa hàng
-          }}
-        />
-        <Button
-          title="Giao hàng tận nơi"
-          color={shippingMethod === 1 ? 'green' : 'gray'}
-          onPress={() => setShippingMethod(1)}
-        />
+      <Text style={styles.title}>Nhận tại cửa hàng</Text>
+      <Text style={styles.subtitle}>
+        Bạn sẽ đến cửa hàng để lấy và trả sản phẩm.
+      </Text>
+      <View style={styles.buttonContainer}>
+        <Button title="Tiếp theo" onPress={handleNext} color="#2E86DE" />
       </View>
-
-      {/* Nhập địa chỉ giao hàng */}
-      {shippingMethod === 1 && (
-        <TextInput
-          style={styles.input}
-          placeholder="Nhập địa chỉ giao hàng..."
-          value={address}
-          onChangeText={setAddress}
-        />
-      )}
-
-      {/* Nút Tiếp theo */}
-      <Button title="Tiếp theo" onPress={handleNext} />
     </View>
   );
 };
+
+export default ShippingMethod;
 
 const styles = StyleSheet.create({
   container: {
@@ -82,29 +42,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-  },
-  errorText: {
-    color: 'red',
     marginBottom: 10,
     textAlign: 'center',
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 30,
+    textAlign: 'center',
+    color: '#555',
+  },
+  buttonContainer: {
+    marginHorizontal: 80,
+    marginTop: 10,
   },
 });
-
-export default ShippingMethod;
