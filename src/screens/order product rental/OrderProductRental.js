@@ -34,9 +34,8 @@ const OrderProductRental = ({ route, navigation }) => {
         );
         const data = await response.json();
 
-        if (data.isSuccess && data.result && data.result.length > 0) {
-          // data.result là một mảng => lấy phần tử đầu tiên
-          setProduct(data.result[0]);
+        if (data.isSuccess) {
+          setProduct(data.result);
         } else {
           Alert.alert('Lỗi', 'Không thể lấy thông tin sản phẩm.');
         }
@@ -47,7 +46,7 @@ const OrderProductRental = ({ route, navigation }) => {
         setLoading(false);
       }
     };
-
+    
     if (productID) {
       fetchProductDetails();
     }

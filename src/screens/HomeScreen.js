@@ -14,7 +14,7 @@ const HomeScreen = ({ navigation }) => {
     const [totalCount, setTotalCount] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [favorites, setFavorites] = useState([]);
-    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedProductId, setSelectedProductId] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const fetchAllProducts = async (currentFilter) => {
@@ -92,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
     };
 
     const showProductDetail = (item) => {
-        setSelectedProduct(item);
+        setSelectedProductId(item.productID);  // Lưu ID
         setIsModalVisible(true);
     };
 
@@ -240,7 +240,7 @@ const HomeScreen = ({ navigation }) => {
 
             <ProductDetailModal
                 visible={isModalVisible}
-                item={selectedProduct}
+                productId={selectedProductId}
                 onClose={() => setIsModalVisible(false)}
             />
 

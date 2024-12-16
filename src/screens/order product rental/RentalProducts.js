@@ -24,7 +24,7 @@ const RentalProducts = ({ navigation }) => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [favorites, setFavorites] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProductID, setSelectedProductID] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   // API gọi về danh sách sản phẩm (rental: status === 1)
@@ -113,9 +113,10 @@ const RentalProducts = ({ navigation }) => {
   };
 
   const showProductDetail = (item) => {
-    setSelectedProduct(item);
+    setSelectedProductID(item.productID); // Chỉ lưu productID
     setIsModalVisible(true);
   };
+
 
   // Hiển thị thanh phân trang
   const renderPagination = () => {
@@ -271,7 +272,7 @@ const RentalProducts = ({ navigation }) => {
       {/* Hiển thị modal chi tiết */}
       <ProductDetailModal
         visible={isModalVisible}
-        item={selectedProduct}
+        productId={selectedProductID}      // Chuyển prop productId thay vì item
         onClose={() => setIsModalVisible(false)}
       />
 

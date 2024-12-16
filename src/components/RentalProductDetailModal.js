@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,57 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const RentalProductDetailModal = ({ visible, item, onClose }) => {
-  const navigation = useNavigation(); // Lấy navigation từ context
+const RentalProductDetailModal = ({ visible, productId, onClose }) => {
+  const navigation = useNavigation();
+  
+  // Tạo state để lưu chi tiết sản phẩm sau khi fetch
+  const [productData, setProductData] = useState(null);
 
-  if (!item) return null;
+  useEffect(() => {
+    // Nếu modal đang mở & có productId => Fetch chi tiết sản phẩm
+    if (visible && productId) {
+      const fetchProductDetail = async () => {
+        try {
+          const response = await fetch(
+            `http://14.225.220.108:2602/product/get-product-by-id?id=${productId}`
+          );
+          const data = await response.json();
+          if (data.isSuccess && data.result) {
+            setProductData(data.result);
+          } else {
+            console.log('Unexpected Data:', data);
+          }
+        } catch (error) {
+          console.error('Error fetching product detail:', error);
+        }
+      };
+      fetchProductDetail();
+    } else {
+      // Nếu modal tắt hoặc chưa có productId => reset productData
+      setProductData(null);
+    }
+  }, [visible, productId]);
+
+  // Nếu modal chưa mở hoặc chưa có productId, không render Modal
+  if (!visible || !productId) {
+    return null;
+  }
+
+  // Nếu đang fetch hoặc chưa có productData => Hiển thị tạm "Loading..."
+  if (!productData) {
+    return (
+      <Modal visible={visible} transparent={true} onRequestClose={onClose}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Text style={styles.closeText}>X</Text>
+            </TouchableOpacity>
+            <Text>Đang tải dữ liệu sản phẩm...</Text>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
 
   const handleRentProduct = async () => {
     try {
@@ -29,7 +76,7 @@ const RentalProductDetailModal = ({ visible, item, onClose }) => {
       }
 
       onClose(); // Đóng modal trước khi chuyển trang
-      navigation.navigate('OrderProductRental', { productID: item.productID });
+      navigation.navigate('OrderProductRental', { productID: productData.productID });
     } catch (error) {
       console.error('Error checking login status:', error);
       Alert.alert('Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại sau.');
@@ -37,12 +84,7 @@ const RentalProductDetailModal = ({ visible, item, onClose }) => {
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent={true} onRequestClose={onClose}>
       <View style={styles.modalBackground}>
         <View style={styles.modalContainer}>
           {/* Nút đóng */}
@@ -52,47 +94,70 @@ const RentalProductDetailModal = ({ visible, item, onClose }) => {
 
           <ScrollView contentContainerStyle={styles.scrollContent}>
             {/* Hình ảnh sản phẩm */}
-            <Image source={{ uri: item.listImage[0]?.image }} style={styles.productImage} />
+            <Image
+              source={{ uri: productData.listImage?.[0]?.image }}
+              style={styles.productImage}
+            />
 
             {/* Tên sản phẩm */}
-            <Text style={styles.productName}>{item.productName}</Text>
+            <Text style={styles.productName}>{productData.productName}</Text>
 
             {/* Thông tin chi tiết */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Serial Number:</Text>
-              <Text style={styles.infoValue}>{item.serialNumber || 'N/A'}</Text>
+              <Text style={styles.infoValue}>{productData.serialNumber || 'N/A'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Mô tả:</Text>
-              <Text style={styles.infoValue}>{item.productDescription || 'Không có'}</Text>
+              <Text style={styles.infoValue}>{productData.productDescription || 'Không có'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Cọc sản phẩm:</Text>
-              <Text style={styles.infoValue}>{item.depositProduct.toLocaleString() || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>
+                {productData.depositProduct
+                  ? productData.depositProduct.toLocaleString()
+                  : 'Không có'} đ
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá (Thuê)/giờ:</Text>
-              <Text style={styles.infoValue}>{item.pricePerHour.toLocaleString() || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>
+                {productData.pricePerHour
+                  ? productData.pricePerHour.toLocaleString()
+                  : 'Không có'} đ
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá (Thuê)/ngày:</Text>
-              <Text style={styles.infoValue}>{item.pricePerDay.toLocaleString() || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>
+                {productData.pricePerDay
+                  ? productData.pricePerDay.toLocaleString()
+                  : 'Không có'} đ
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá (Thuê)/tuần:</Text>
-              <Text style={styles.infoValue}>{item.pricePerWeek.toLocaleString() || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>
+                {productData.pricePerWeek
+                  ? productData.pricePerWeek.toLocaleString()
+                  : 'Không có'} đ
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá (Thuê)/tháng:</Text>
-              <Text style={styles.infoValue}>{item.pricePerMonth.toLocaleString() || 'Không có'} đ</Text>
+              <Text style={styles.infoValue}>
+                {productData.pricePerMonth
+                  ? productData.pricePerMonth.toLocaleString()
+                  : 'Không có'} đ
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Thương hiệu:</Text>
-              <Text style={styles.infoValue}>{item.brand || 'Không có'}</Text>
+              <Text style={styles.infoValue}>{productData.brand || 'Không có'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Đánh giá:</Text>
-              <Text style={styles.infoValue}>{item.rating || 0} ⭐</Text>
+              <Text style={styles.infoValue}>{productData.rating || 0} ⭐</Text>
             </View>
           </ScrollView>
 
@@ -104,6 +169,9 @@ const RentalProductDetailModal = ({ visible, item, onClose }) => {
   );
 };
 
+export default RentalProductDetailModal;
+
+// CSS giữ nguyên
 const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
@@ -117,7 +185,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
-    elevation: 5,
   },
   closeButton: {
     position: 'absolute',
@@ -157,5 +224,3 @@ const styles = StyleSheet.create({
     flex: 2,
   },
 });
-
-export default RentalProductDetailModal;
