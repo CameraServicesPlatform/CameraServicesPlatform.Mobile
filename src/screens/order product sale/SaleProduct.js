@@ -110,13 +110,94 @@ const SaleProducts = ({ navigation }) => {
         if (totalPages <= 1) return null;
 
         const pages = [];
-        const maxPageButtons = 3;
+        const maxPageButtons = 5;
         const startPage = Math.max(1, pageIndex - Math.floor(maxPageButtons / 2));
         const endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
 
-        // Code pagination cũ giữ nguyên ...
-        // ...
-        // return JSX pagination ...
+        if (startPage > 1) {
+            pages.push(
+                <Button
+                    key="1"
+                    title="1"
+                    onPress={() => setPageIndex(1)}
+                    color={pageIndex === 1 ? 'blue' : 'gray'}
+                />
+            );
+            if (startPage > 2) {
+                pages.push(
+                    <Text key="dots-start" style={styles.paginationDots}>
+                        ...
+                    </Text>
+                );
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(
+                <Button
+                    key={i}
+                    title={String(i)}
+                    onPress={() => setPageIndex(i)}
+                    color={i === pageIndex ? 'blue' : 'gray'}
+                />
+            );
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                pages.push(
+                    <Text key="dots-end" style={styles.paginationDots}>
+                        ...
+                    </Text>
+                );
+            }
+            pages.push(
+                <Button
+                    key="last"
+                    title={String(totalPages)}
+                    onPress={() => setPageIndex(totalPages)}
+                    color={pageIndex === totalPages ? 'blue' : 'gray'}
+                />
+            );
+        }
+
+        return (
+            <View style={styles.paginationContainer}>
+                <View style={styles.pagination}>
+                    <TouchableOpacity
+                        style={[styles.navButton, pageIndex === 1 && styles.navButtonDisabled]}
+                        onPress={() => setPageIndex(1)}
+                        disabled={pageIndex === 1}
+                    >
+                        <Text style={styles.navButtonText}>{'<<<'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.navButton, pageIndex === 1 && styles.navButtonDisabled]}
+                        onPress={() => setPageIndex(pageIndex - 1)}
+                        disabled={pageIndex === 1}
+                    >
+                        <Text style={styles.navButtonText}>{'<'}</Text>
+                    </TouchableOpacity>
+
+                    {pages}
+
+                    <TouchableOpacity
+                        style={[styles.navButton, pageIndex === totalPages && styles.navButtonDisabled]}
+                        onPress={() => setPageIndex(pageIndex + 1)}
+                        disabled={pageIndex === totalPages}
+                    >
+                        <Text style={styles.navButtonText}>{'>'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.navButton, pageIndex === totalPages && styles.navButtonDisabled]}
+                        onPress={() => setPageIndex(totalPages)}
+                        disabled={pageIndex === totalPages}
+                    >
+                        <Text style={styles.navButtonText}>{'>>>'}</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
     };
 
     return (
