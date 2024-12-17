@@ -10,10 +10,8 @@ import {
 } from 'react-native';
 
 const ProductDetailModal = ({ visible, productId, onClose }) => {
-  // Tạo state để lưu chi tiết sản phẩm sau khi fetch
   const [productData, setProductData] = useState(null);
 
-  // Khi modal mở (visible=true) và có productId, ta fetch chi tiết sản phẩm
   useEffect(() => {
     if (visible && productId) {
       const fetchProductDetail = async () => {
@@ -31,17 +29,14 @@ const ProductDetailModal = ({ visible, productId, onClose }) => {
       };
       fetchProductDetail();
     } else {
-      // Nếu tắt modal hoặc chưa có productId, reset lại productData
       setProductData(null);
     }
   }, [visible, productId]);
 
-  // Nếu modal chưa mở hoặc chưa có ID, không render gì cả
   if (!visible || !productId) {
     return null;
   }
 
-  // Nếu đang fetch hoặc chưa có productData, có thể hiển thị "Loading..."
   if (!productData) {
     return (
       <Modal
@@ -62,7 +57,10 @@ const ProductDetailModal = ({ visible, productId, onClose }) => {
     );
   }
 
-  // Render thông tin sản phẩm sau khi đã fetch xong
+  // Kiểm tra xem priceBuy có giá trị (không null, không rỗng)
+  // Lưu ý: tùy cấu trúc dữ liệu, bạn kiểm tra thêm kiểu number hay string.
+  const hasPriceBuy = productData.priceBuy !== null && productData.priceBuy !== '';
+
   return (
     <Modal
       visible={visible}
@@ -72,7 +70,7 @@ const ProductDetailModal = ({ visible, productId, onClose }) => {
     >
       <View style={styles.modalBackground}>
         <View style={styles.modalContainer}>
-          {/* Nút đóng */}
+
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeText}>X</Text>
           </TouchableOpacity>
@@ -87,43 +85,71 @@ const ProductDetailModal = ({ visible, productId, onClose }) => {
             {/* Tên sản phẩm */}
             <Text style={styles.productName}>{productData.productName}</Text>
 
-            {/* Thông tin chi tiết */}
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Serial Number:</Text>
-              <Text style={styles.infoValue}>{productData.serialNumber || 'N/A'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Mô tả:</Text>
-              <Text style={styles.infoValue}>{productData.productDescription || 'Không có'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Cọc sản phẩm:</Text>
-              <Text style={styles.infoValue}>{productData.depositProduct || 'Không có'} đ</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Giá (Thuê)/giờ:</Text>
-              <Text style={styles.infoValue}>{productData.pricePerHour || 'Không có'} đ</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Giá (Thuê)/ngày:</Text>
-              <Text style={styles.infoValue}>{productData.pricePerDay || 'Không có'} đ</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Giá (Thuê)/tuần:</Text>
-              <Text style={styles.infoValue}>{productData.pricePerWeek || 'Không có'} đ</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Giá (Thuê)/tháng:</Text>
-              <Text style={styles.infoValue}>{productData.pricePerMonth || 'Không có'} đ</Text>
-            </View>
+            {/* Thương hiệu */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Thương hiệu:</Text>
               <Text style={styles.infoValue}>{productData.brand || 'Không có'}</Text>
             </View>
+
+            {/* Đánh giá */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Đánh giá:</Text>
               <Text style={styles.infoValue}>{productData.rating || 0} ⭐</Text>
             </View>
+
+            {/* Serial Number */}
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Serial Number:</Text>
+              <Text style={styles.infoValue}>{productData.serialNumber || 'N/A'}</Text>
+            </View>
+
+            {/* Mô tả */}
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Mô tả:</Text>
+              <Text style={styles.infoValue}>{productData.productDescription || 'Không có'}</Text>
+            </View>
+
+            {hasPriceBuy ? (
+              // Nếu có priceBuy, hiển thị giá mua và ẩn các field liên quan tới thuê
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Giá mua:</Text>
+                <Text style={styles.infoValue}>{productData.priceBuy} đ</Text>
+              </View>
+            ) : (
+              // Ngược lại, hiển thị các thông tin giá thuê
+              <>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Cọc sản phẩm:</Text>
+                  <Text style={styles.infoValue}>
+                    {productData.depositProduct || 'Không có'} đ
+                  </Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Giá (Thuê)/giờ:</Text>
+                  <Text style={styles.infoValue}>
+                    {productData.pricePerHour || 'Không có'} đ
+                  </Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Giá (Thuê)/ngày:</Text>
+                  <Text style={styles.infoValue}>
+                    {productData.pricePerDay || 'Không có'} đ
+                  </Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Giá (Thuê)/tuần:</Text>
+                  <Text style={styles.infoValue}>
+                    {productData.pricePerWeek || 'Không có'} đ
+                  </Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Giá (Thuê)/tháng:</Text>
+                  <Text style={styles.infoValue}>
+                    {productData.pricePerMonth || 'Không có'} đ
+                  </Text>
+                </View>
+              </>
+            )}
           </ScrollView>
         </View>
       </View>
