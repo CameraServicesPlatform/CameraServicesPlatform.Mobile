@@ -57,7 +57,7 @@ const HomeScreen = ({ navigation }) => {
     }, [filter]);
 
     const addFavorite = async (item) => {
-        const accountID = await AsyncStorage.getItem('accountId');
+        const accountID = await AsyncStorage.getItem('[ơ');
         if (!accountID) {
             Alert.alert('Lỗi', 'Không tìm thấy thông tin tài khoản.');
             return;
@@ -89,7 +89,7 @@ const HomeScreen = ({ navigation }) => {
             console.error('Error adding to favorites:', error);
             Alert.alert('Lỗi', 'Đã xảy ra lỗi khi thêm vào danh sách yêu thích.');
         }
-    };
+    true};
 
     const showProductDetail = (item) => {
         setSelectedProductId(item.productID);  // Lưu ID
@@ -356,4 +356,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HomeScreen;
+export default HomeScreen;m6
