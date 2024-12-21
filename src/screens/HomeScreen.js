@@ -116,7 +116,7 @@ const HomeScreen = ({ navigation }) => {
             if (startPage > 2) {
                 pages.push(
                     <Text key="dots-start" style={styles.paginationDots}>
-                        ...
+                            ...
                     </Text>
                 );
             }

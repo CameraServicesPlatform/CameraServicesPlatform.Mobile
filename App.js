@@ -52,7 +52,7 @@ export default function App() {
           source={require('./src/images/image.png')} // Thay bằng URL hoặc require ảnh
           style={styles.logo}
         />
-      </View>
+      </View>vưa+-+\ư
       {/* Danh sách các mục Drawer */}
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
@@ -74,7 +74,10 @@ export default function App() {
 
         {!isLoggedIn && (
           <>
-            <Drawer.Screen name="Login" component={(props) => <Login {...props} onLoginSuccess={checkLoginStatus} />} options={{ headerShown: true, title: 'Đăng nhập' }} />
+            <Drawer.Screen 
+              name="Login" 
+              component={(props) => <Login {...props} onLoginSuccess={checkLoginStatus} />} 
+              options={{ headerShown: true, title: 'Đăng nhập' }} />
             <Drawer.Screen name="SignUp" component={SignUp} options={{ headerShown: true, title: 'Đăng kí' }} />
           </>
         )}
