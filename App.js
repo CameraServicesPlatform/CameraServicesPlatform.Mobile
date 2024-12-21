@@ -52,7 +52,7 @@ export default function App() {
           source={require('./src/images/image.png')} // Thay bằng URL hoặc require ảnh
           style={styles.logo}
         />
-      </View>vưa+-+\ư
+      </View>
       {/* Danh sách các mục Drawer */}
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
