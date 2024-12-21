@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons'; // Import thư viện icon
 
 // Import các màn hình
 import HomeScreen from './src/screens/HomeScreen';
@@ -43,17 +44,14 @@ export default function App() {
     }
   };
 
-  // Tùy chỉnh nội dung Drawer
   const CustomDrawerContent = (props) => (
     <DrawerContentScrollView {...props}>
-      {/* Thêm logo vào đầu Drawer */}
       <View style={styles.logoContainer}>
         <Image
-          source={require('./src/images/image.png')} // Thay bằng URL hoặc require ảnh
+          source={require('./src/images/image.png')}
           style={styles.logo}
         />
       </View>
-      {/* Danh sách các mục Drawer */}
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
   );
@@ -64,24 +62,124 @@ export default function App() {
         initialRouteName="Home"
         drawerContent={(props) => <CustomDrawerContent {...props} />}
       >
-        <Drawer.Screen name="Home" component={HomeScreen} options={{ headerShown: true, title: 'Trang chủ' }} />
-        <Drawer.Screen name="Category" component={Category} options={{ headerShown: true, title: 'Danh mục' }} />
-        <Drawer.Screen name="RentalProduct" component={RentalProduct} options={{ headerShown: true, title: 'Sản phẩm thuê' }} />
-        <Drawer.Screen name="ProductSale" component={ProductSaleStack} options={{ headerShown: true, title: 'Sản phẩm bán' }} />
-        <Drawer.Screen name="Policy" component={Policy} options={{ headerShown: true, title: 'Chính sách' }} />
-        <Drawer.Screen name="Favorites" component={SettingsScreen} options={{ headerShown: true, title: 'Yêu thích' }} />
-        <Drawer.Screen name="Contact" component={Contact} options={{ headerShown: true, title: 'Liên hệ' }} />
+        <Drawer.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            headerShown: true,
+            title: 'Trang chủ',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="home" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="Category"
+          component={Category}
+          options={{
+            headerShown: true,
+            title: 'Danh mục',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="list" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="RentalProduct"
+          component={RentalProduct}
+          options={{
+            headerShown: true,
+            title: 'Sản phẩm thuê',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="basket" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="ProductSale"
+          component={ProductSaleStack}
+          options={{
+            headerShown: true,
+            title: 'Sản phẩm bán',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="pricetag" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="Policy"
+          component={Policy}
+          options={{
+            headerShown: true,
+            title: 'Chính sách',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="document" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="Favorites"
+          component={SettingsScreen}
+          options={{
+            headerShown: true,
+            title: 'Yêu thích',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="heart" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="Contact"
+          component={Contact}
+          options={{
+            headerShown: true,
+            title: 'Liên hệ',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="call" size={size} color={color} />
+            ),
+          }}
+        />
 
         {!isLoggedIn && (
           <>
-            <Drawer.Screen name="Login" component={(props) => <Login {...props} onLoginSuccess={checkLoginStatus} />} options={{ headerShown: true, title: 'Đăng nhập' }} />
-            <Drawer.Screen name="SignUp" component={SignUp} options={{ headerShown: true, title: 'Đăng kí' }} />
+            <Drawer.Screen
+              name="Login"
+              component={(props) => <Login {...props} onLoginSuccess={checkLoginStatus} />}
+              options={{
+                headerShown: true,
+                title: 'Đăng nhập',
+                drawerIcon: ({ color, size }) => (
+                  <Ionicons name="log-in" size={size} color={color} />
+                ),
+              }}
+            />
+            <Drawer.Screen
+              name="SignUp"
+              component={SignUp}
+              options={{
+                headerShown: true,
+                title: 'Đăng kí',
+                drawerIcon: ({ color, size }) => (
+                  <Ionicons name="person-add" size={size} color={color} />
+                ),
+              }}
+            />
           </>
         )}
 
         {isLoggedIn && (
           <>
-            <Drawer.Screen name="Account" component={AccountStack} options={{ headerShown: true }} />
+            <Drawer.Screen
+              name="Account"
+              component={AccountStack}
+              options={{
+                headerShown: true,
+                title: 'Tài khoản',
+                drawerIcon: ({ color, size }) => (
+                  <Ionicons name="person" size={size} color={color} />
+                ),
+              }}
+            />
             <Drawer.Screen
               name="Logout"
               component={({ navigation }) => {
@@ -90,7 +188,12 @@ export default function App() {
                 }, []);
                 return null;
               }}
-              options={{ headerShown: false }}
+              options={{
+                headerShown: false,
+                drawerIcon: ({ color, size }) => (
+                  <Ionicons name="log-out" size={size} color={color} />
+                ),
+              }}
             />
           </>
         )}
@@ -108,6 +211,5 @@ const styles = StyleSheet.create({
   logo: {
     width: 300,
     height: 100,
-
   },
 });

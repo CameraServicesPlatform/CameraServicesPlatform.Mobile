@@ -92,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
     };
 
     const showProductDetail = (item) => {
-        setSelectedProductId(item.productID);  // Lưu ID
+        setSelectedProductId(item.productID);
         setIsModalVisible(true);
     };
 
