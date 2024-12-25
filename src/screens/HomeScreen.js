@@ -23,10 +23,16 @@ const HomeScreen = ({ navigation }) => {
             const response = await fetch(apiUrl);
             const data = await response.json();
             if (data.isSuccess) {
+                // Giả sử mảng trả về nằm trong data.result
                 const fullProducts = data.result || [];
-                setAllProducts(fullProducts);
-                setTotalCount(fullProducts.length);
-                setTotalPages(Math.ceil(fullProducts.length / pageSize));
+                // Lọc lấy các sản phẩm có status = 0 hoặc 1
+                const filteredProducts = fullProducts.filter(
+                    (product) => product.status === 1 || product.status === 0
+                );
+
+                setAllProducts(filteredProducts);
+                setTotalCount(filteredProducts.length);
+                setTotalPages(Math.ceil(filteredProducts.length / pageSize));
                 setPageIndex(1);
             } else {
                 setAllProducts([]);
@@ -216,10 +222,13 @@ const HomeScreen = ({ navigation }) => {
                         setPageIndex(1);
                     }}
                 />
-                <TouchableOpacity style={styles.setButton} onPress={() => {
-                    setTotalPages(Math.ceil(totalCount / pageSize));
-                    updatePageProducts();
-                }}>
+                <TouchableOpacity
+                    style={styles.setButton}
+                    onPress={() => {
+                        setTotalPages(Math.ceil(totalCount / pageSize));
+                        updatePageProducts();
+                    }}
+                >
                     <Text style={styles.setButtonText}>Set</Text>
                 </TouchableOpacity>
             </View>
@@ -232,7 +241,7 @@ const HomeScreen = ({ navigation }) => {
                         <ProductCard
                             item={item}
                             isFavorite={favorites.some((fav) => fav.productID === item.productID)}
-                            onToggleFavorite={() => addFavorite(item)} // Gọi addFavorite tại đây
+                            onToggleFavorite={() => addFavorite(item)}
                         />
                     </TouchableOpacity>
                 )}
