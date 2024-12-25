@@ -91,7 +91,7 @@ const ReviewOrder = ({ route, navigation }) => {
         </Text>
         <Text style={styles.itemText}>
           <Text style={styles.label}>Giá: </Text>
-          {priceBuy ? `${priceBuy} đ` : 'Không có giá mua'}
+          {priceBuy ? `${priceBuy} vnđ` : 'Không có giá mua'}
         </Text>
         <Text style={styles.itemText}>
           <Text style={styles.label}>Chất lượng: </Text>

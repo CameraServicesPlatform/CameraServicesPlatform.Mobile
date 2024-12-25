@@ -165,7 +165,7 @@ const OrderConfirmation = ({ route }) => {
           <View style={styles.voucherContainer}>
             <Text style={styles.text}>Voucher ID: {voucherInfo.vourcherID}</Text>
             <Text style={styles.text}>Mô tả: {voucherInfo.description}</Text>
-            <Text style={styles.text}>Giảm giá: {voucherInfo.discountAmount.toLocaleString()} đ</Text>
+            <Text style={styles.text}>Giảm giá: {voucherInfo.discountAmount.toLocaleString()} vnđ</Text>
           </View>
         ) : (
           <Text style={styles.text}>Không thể lấy thông tin voucher.</Text>

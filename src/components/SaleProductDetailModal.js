@@ -112,7 +112,7 @@ const SaleProductDetailModal = ({ visible, productId, onClose }) => {
               <Text style={styles.infoValue}>
                 {productData.priceBuy
                   ? productData.priceBuy.toLocaleString()
-                  : 'Không có'} đ
+                  : 'Không có'} vnđ
               </Text>
             </View>
             <View style={styles.infoRow}>

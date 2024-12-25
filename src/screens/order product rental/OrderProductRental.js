@@ -34,6 +34,24 @@ const OrderProductRental = ({ route, navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
+  // Hàm chuyển định dạng chuỗi ISO thành "HH:mm DD/MM/YYYY"
+  const formatDateTime = (isoString) => {
+    if (!isoString) return 'Không có';
+
+    const dateObj = new Date(isoString);
+
+    // Lấy ngày/tháng/năm
+    const day = dateObj.getDate().toString().padStart(2, '0');       // Thêm '0' nếu chỉ có 1 chữ số
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const year = dateObj.getFullYear().toString();
+
+    // Lấy giờ/phút
+    const hours = dateObj.getHours().toString().padStart(2, '0');    // Thêm '0' nếu chỉ có 1 chữ số
+    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+
+    // Format lại theo "HH:mm DD/MM/YYYY"
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
+  };
   // Lấy thông tin chi tiết sản phẩm
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -140,10 +158,10 @@ const OrderProductRental = ({ route, navigation }) => {
         unit === 'hour'
           ? product.pricePerHour * value
           : unit === 'day'
-          ? product.pricePerDay * value
-          : unit === 'week'
-          ? product.pricePerWeek * value
-          : product.pricePerMonth * value;
+            ? product.pricePerDay * value
+            : unit === 'week'
+              ? product.pricePerWeek * value
+              : product.pricePerMonth * value;
 
       // Tổng tiền = tiền đặt cọc + tiền thuê
       setTotalPrice(product.depositProduct + rentalPrice);
@@ -173,27 +191,38 @@ const OrderProductRental = ({ route, navigation }) => {
                 style={styles.productImage}
               />
             )}
-            
+
             <Text style={styles.title}>{product.productName}</Text>
 
             <View style={styles.infoContainer}>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Giá cọc:</Text> {product.depositProduct} đ
+                <Text style={styles.infoLabel}>Giá cọc:</Text> {product.depositProduct} vnđ
               </Text>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Thuê theo giờ:</Text> {product.pricePerHour} đ
+                <Text style={styles.infoLabel}>Thuê theo giờ:</Text> {product.pricePerHour} vnđ
               </Text>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Thuê theo ngày:</Text> {product.pricePerDay} đ
+                <Text style={styles.infoLabel}>Thuê theo ngày:</Text> {product.pricePerDay} vnđ
               </Text>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Thuê theo tuần:</Text> {product.pricePerWeek} đ
+                <Text style={styles.infoLabel}>Thuê theo tuần:</Text> {product.pricePerWeek} vnđ
               </Text>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Thuê theo tháng:</Text> {product.pricePerMonth} đ
+                <Text style={styles.infoLabel}>Thuê theo tháng:</Text> {product.pricePerMonth} vnđ
               </Text>
             </View>
-
+            {/* Chọn ngày & giờ bắt đầu */}
+            <Text style={styles.label}>Ngày bắt đầu thuê:</Text>
+            <View style={styles.buttonGroup}>
+              <Button
+                title="Chọn ngày"
+                onPress={() => setShowDatePicker(true)}
+              />
+              <Button
+                title="Chọn giờ"
+                onPress={() => setShowTimePicker(true)}
+              />
+            </View>
             {/* Chọn đơn vị thời gian */}
             <Text style={styles.label}>Đơn vị thời gian:</Text>
             <Picker
@@ -217,18 +246,7 @@ const OrderProductRental = ({ route, navigation }) => {
               placeholder="Nhập số giờ/ngày/tuần/tháng..."
             />
 
-            {/* Chọn ngày & giờ bắt đầu */}
-            <Text style={styles.label}>Ngày bắt đầu thuê:</Text>
-            <View style={styles.buttonGroup}>
-              <Button
-                title="Chọn ngày"
-                onPress={() => setShowDatePicker(true)}
-              />
-              <Button
-                title="Chọn giờ"
-                onPress={() => setShowTimePicker(true)}
-              />
-            </View>
+            
 
             {/* Date picker */}
             {showDatePicker && (
@@ -264,17 +282,17 @@ const OrderProductRental = ({ route, navigation }) => {
             )}
 
             <Text style={styles.text}>
-              Ngày bắt đầu: {startDate?.toISOString() || 'Chưa xác định'}
+              Ngày bắt đầu: {formatDateTime(startDate?.toISOString()) || 'Chưa xác định'}
             </Text>
             <Text style={styles.text}>
-              Ngày kết thúc thuê: {endDate?.toISOString() || 'Chưa xác định'}
+              Ngày kết thúc thuê: {formatDateTime(endDate?.toISOString()) || 'Chưa xác định'}
             </Text>
             <Text style={styles.text}>
-              Ngày trả hàng: {returnDate?.toISOString() || 'Chưa xác định'}
+              Ngày trả hàng: {formatDateTime(returnDate?.toISOString()) || 'Chưa xác định'}
             </Text>
 
             <Text style={styles.totalText}>
-              Tổng giá tiền: {totalPrice.toLocaleString()} đ
+              Tổng giá tiền: {totalPrice.toLocaleString()} vnđ
             </Text>
 
             {/* Nút chuyển sang trang ShippingMethod */}

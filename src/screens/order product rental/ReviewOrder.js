@@ -88,10 +88,10 @@ const ReviewOrder = ({ route, navigation }) => {
                         <Text style={styles.sectionTitle}>Thông tin sản phẩm</Text>
                         <Text style={styles.text}>Tên sản phẩm: {productDetails.productName}</Text>
                         <Text style={styles.text}>Mô tả: {productDetails.productDescription}</Text>
-                        <Text style={styles.text}>Giá thuê/giờ: {productDetails.pricePerHour?.toLocaleString() || 'Không có'} đ</Text>
-                        <Text style={styles.text}>Giá thuê/ngày: {productDetails.pricePerDay?.toLocaleString() || 'Không có'} đ</Text>
-                        <Text style={styles.text}>Giá thuê/tuần: {productDetails.pricePerWeek?.toLocaleString() || 'Không có'} đ</Text>
-                        <Text style={styles.text}>Giá thuê/tháng: {productDetails.pricePerMonth?.toLocaleString() || 'Không có'} đ</Text>
+                        <Text style={styles.text}>Giá thuê/giờ: {productDetails.pricePerHour?.toLocaleString() || 'Không có'} vnđ</Text>
+                        <Text style={styles.text}>Giá thuê/ngày: {productDetails.pricePerDay?.toLocaleString() || 'Không có'} vnđ</Text>
+                        <Text style={styles.text}>Giá thuê/tuần: {productDetails.pricePerWeek?.toLocaleString() || 'Không có'} vnđ</Text>
+                        <Text style={styles.text}>Giá thuê/tháng: {productDetails.pricePerMonth?.toLocaleString() || 'Không có'} vnđ</Text>
                         <Text style={styles.text}>Đánh giá: {productDetails.rating} ⭐</Text>
                     </View>
                 )}
@@ -101,7 +101,7 @@ const ReviewOrder = ({ route, navigation }) => {
                     <Text style={styles.text}>Ngày bắt đầu thuê: {startDate}</Text>
                     <Text style={styles.text}>Ngày kết thúc thuê: {endDate}</Text>
                     <Text style={styles.text}>Ngày trả hàng: {returnDate}</Text>
-                    <Text style={styles.text}>Tổng giá tiền: {totalPrice.toLocaleString()} đ</Text>
+                    <Text style={styles.text}>Tổng giá tiền: {totalPrice.toLocaleString()} vnđ</Text>
                     <Text style={styles.text}>Phương thức giao hàng: {shippingMethod === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng tận nơi'}</Text>
                     {shippingMethod === 1 && <Text style={styles.text}>Địa chỉ giao hàng: {address}</Text>}
                 </View>
@@ -111,7 +111,7 @@ const ReviewOrder = ({ route, navigation }) => {
                         <Text style={styles.sectionTitle}>Thông tin voucher</Text>
                         <Text style={styles.text}>Mã giảm giá: {voucherDetails.vourcherCode}</Text>
                         <Text style={styles.text}>Mô tả: {voucherDetails.description}</Text>
-                        <Text style={styles.text}>Số tiền giảm: {voucherDetails.discountAmount.toLocaleString()} đ</Text>
+                        <Text style={styles.text}>Số tiền giảm: {voucherDetails.discountAmount.toLocaleString()} vnđ</Text>
                     </View>
                 ) : (
                     <View style={styles.section}>

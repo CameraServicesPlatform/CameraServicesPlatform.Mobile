@@ -116,7 +116,7 @@ const RentalProductDetailModal = ({ visible, productId, onClose }) => {
               <Text style={styles.infoValue}>
                 {productData.depositProduct
                   ? productData.depositProduct.toLocaleString()
-                  : 'Không có'} đ
+                  : 'Không có'} vnđ
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -124,7 +124,7 @@ const RentalProductDetailModal = ({ visible, productId, onClose }) => {
               <Text style={styles.infoValue}>
                 {productData.pricePerHour
                   ? productData.pricePerHour.toLocaleString()
-                  : 'Không có'} đ
+                  : 'Không có'} vnđ
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -132,7 +132,7 @@ const RentalProductDetailModal = ({ visible, productId, onClose }) => {
               <Text style={styles.infoValue}>
                 {productData.pricePerDay
                   ? productData.pricePerDay.toLocaleString()
-                  : 'Không có'} đ
+                  : 'Không có'} vnđ
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -140,7 +140,7 @@ const RentalProductDetailModal = ({ visible, productId, onClose }) => {
               <Text style={styles.infoValue}>
                 {productData.pricePerWeek
                   ? productData.pricePerWeek.toLocaleString()
-                  : 'Không có'} đ
+                  : 'Không có'} vnđ
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -148,7 +148,7 @@ const RentalProductDetailModal = ({ visible, productId, onClose }) => {
               <Text style={styles.infoValue}>
                 {productData.pricePerMonth
                   ? productData.pricePerMonth.toLocaleString()
-                  : 'Không có'} đ
+                  : 'Không có'} vnđ
               </Text>
             </View>
             <View style={styles.infoRow}>

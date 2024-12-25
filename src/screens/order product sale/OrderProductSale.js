@@ -57,7 +57,7 @@ const OrderProductSale = ({ route, navigation }) => {
           )}
           <View style={styles.infoContainer}>
             <Text style={styles.title}>{product.productName}</Text>
-            <Text style={styles.text}>Giá mua: {product.priceBuy ? `${product.priceBuy} đ` : 'Không có giá mua'}</Text>
+            <Text style={styles.text}>Giá mua: {product.priceBuy ? `${product.priceBuy} vnđ` : 'Không có giá mua'}</Text>
             <Text style={styles.text}>Chất lượng: {product.quality}</Text>
             <Text style={styles.text}>Mô tả: {product.productDescription || 'Không có mô tả'}</Text>
           </View>

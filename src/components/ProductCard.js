@@ -2,6 +2,26 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Sử dụng biểu tượng trái tim
 
+// Hàm chuyển định dạng chuỗi ISO thành "HH:mm DD/MM/YYYY"
+const formatDateTime = (isoString) => {
+  if (!isoString) return 'Không có';
+
+  const dateObj = new Date(isoString);
+
+  // Lấy ngày/tháng/năm
+  const day = dateObj.getDate().toString().padStart(2, '0');       // Thêm '0' nếu chỉ có 1 chữ số
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const year = dateObj.getFullYear().toString();
+
+  // Lấy giờ/phút
+  const hours = dateObj.getHours().toString().padStart(2, '0');    // Thêm '0' nếu chỉ có 1 chữ số
+  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+
+  // Format lại theo "HH:mm DD/MM/YYYY"
+  return `${hours}:${minutes} ${day}/${month}/${year}`;
+};
+
+
 const ProductCard = ({ item, isFavorite, onToggleFavorite }) => {
   return (
     <View style={styles.productContainer}>
@@ -23,38 +43,40 @@ const ProductCard = ({ item, isFavorite, onToggleFavorite }) => {
       {/* Thông tin sản phẩm */}
       <View style={styles.productDetails}>
         <Text style={styles.productName}>{item.productName}</Text>
+
+        {/* Sử dụng hàm formatDate để hiển thị ngày tháng năm */}
         <Text style={styles.productText}>
-        Ngày sản xuất: {item.dateOfManufacture || 'Không có'}
+          Ngày sản xuất: {item.dateOfManufacture ? formatDateTime(item.dateOfManufacture) : 'Không có'}
         </Text>
 
+
         {item.priceBuy ? (
-  // Hiển thị giá mua nếu priceBuy khác null
-  <Text style={styles.productText}>
-    Giá mua: {item.priceBuy.toLocaleString()} đ
-  </Text>
-) : (
-  // Hiển thị giá thuê nếu priceBuy là null
-  <>
-    <Text style={styles.productText}>
-      Giá thuê giờ: {item.pricePerHour ? `${item.pricePerHour.toLocaleString()} đ` : 'Không có'}
-    </Text>
-    <Text style={styles.productText}>
-      Giá thuê ngày: {item.pricePerDay ? `${item.pricePerDay.toLocaleString()} đ` : 'Không có'}
-    </Text>
-    <Text style={styles.productText}>
-      Giá thuê tuần: {item.pricePerWeek ? `${item.pricePerWeek.toLocaleString()} đ` : 'Không có'}
-    </Text>
-    <Text style={styles.productText}>
-      Giá thuê tháng: {item.pricePerMonth ? `${item.pricePerMonth.toLocaleString()} đ` : 'Không có'}
-    </Text>
-  </>
-)}
+          // Hiển thị giá mua nếu priceBuy khác null
+          <Text style={styles.productText}>
+            Giá mua: {item.priceBuy.toLocaleString()} vnđ
+          </Text>
+        ) : (
+          // Hiển thị giá thuê nếu priceBuy là null
+          <>
+            <Text style={styles.productText}>
+              Giá thuê giờ: {item.pricePerHour ? `${item.pricePerHour.toLocaleString()} vnđ` : 'Không có'}
+            </Text>
+            <Text style={styles.productText}>
+              Giá thuê ngày: {item.pricePerDay ? `${item.pricePerDay.toLocaleString()} vnđ` : 'Không có'}
+            </Text>
+            <Text style={styles.productText}>
+              Giá thuê tuần: {item.pricePerWeek ? `${item.pricePerWeek.toLocaleString()} vnđ` : 'Không có'}
+            </Text>
+            <Text style={styles.productText}>
+              Giá thuê tháng: {item.pricePerMonth ? `${item.pricePerMonth.toLocaleString()} vnđ` : 'Không có'}
+            </Text>
+          </>
+        )}
 
-
-  <Text style={styles.productText}>
-    Đánh giá: {item.rating || 0} ⭐
-  </Text>
-</View>
+        <Text style={styles.productText}>
+          Đánh giá: {item.rating || 0} ⭐
+        </Text>
+      </View>
     </View>
   );
 };

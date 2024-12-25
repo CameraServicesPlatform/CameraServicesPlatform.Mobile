@@ -107,7 +107,7 @@ const Voucher = ({ route, navigation }) => {
             >
               <Text style={styles.voucherCode}>{item.vourcherCode}</Text>
               <Text style={styles.voucherDescription}>{item.description}</Text>
-              <Text style={styles.voucherDiscount}>Giảm giá: {item.discountAmount.toLocaleString()} đ</Text>
+              <Text style={styles.voucherDiscount}>Giảm giá: {item.discountAmount.toLocaleString()} vnđ</Text>
             </TouchableOpacity>
           )}
         />
