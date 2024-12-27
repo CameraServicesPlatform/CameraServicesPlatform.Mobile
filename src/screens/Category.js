@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+
+// Import component mới
+import CategoryProduct from '../components/CategoryProduct';
 
 const Category = () => {
-  const [categories, setCategories] = useState([]); // Danh sách category
-  const [products, setProducts] = useState([]); // Danh sách sản phẩm theo category
-  const [selectedCategory, setSelectedCategory] = useState(null); // Danh mục được chọn
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const fetchCategories = async () => {
     const apiUrl = 'http://14.225.220.108:2602/category/get-all-category';
@@ -45,35 +54,6 @@ const Category = () => {
     fetchProductsByCategory(category.categoryID);
   };
 
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case 0:
-        return 'Còn hàng';
-      case 1:
-        return 'Cho thuê';
-      case 2:
-        return 'Đã thuê';
-      case 3:
-        return 'Đã bán';
-      default:
-        return 'Không xác định';
-    }
-  };
-
-  const renderProduct = ({ item }) => (
-    <View style={styles.productCard}>
-      <Image source={{ uri: item.listImage[0]?.image }} style={styles.productImage} />
-      <View style={styles.productDetails}>
-        <Text style={styles.productName}>{item.productName}</Text>
-        <Text style={styles.productStatus}>Trạng thái: {getStatusLabel(item.status)}</Text>
-        <Text style={styles.productPrice}>
-          Giá: {item.priceBuy ? `${item.priceBuy} đ` : 'Không có'}
-        </Text>
-        <Text style={styles.productRating}>Đánh giá: {item.rating || 0} ⭐</Text>
-      </View>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Danh sách danh mục</Text>
@@ -103,16 +83,9 @@ const Category = () => {
         </ScrollView>
       </View>
 
-      {/* Danh sách sản phẩm */}
+      {/* Danh sách sản phẩm -> Gọi component CategoryProduct */}
       <View style={styles.listContainer}>
-        <FlatList
-          data={products}
-          keyExtractor={(item) => item.productID}
-          renderItem={renderProduct}
-          contentContainerStyle={styles.productList}
-          ListEmptyComponent={<Text style={styles.emptyText}>Không có sản phẩm nào</Text>}
-          keyboardShouldPersistTaps="handled"
-        />
+        <CategoryProduct products={products} />
       </View>
     </View>
   );
@@ -131,7 +104,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   categoryContainer: {
-    height: 60, // Cố định chiều cao của container danh mục
+    height: 60,
     marginBottom: 10,
   },
   categoryButton: {
@@ -156,55 +129,7 @@ const styles = StyleSheet.create({
     color: '#f1f1f1',
   },
   listContainer: {
-    flex: 1, // Đảm bảo FlatList chiếm toàn bộ chiều cao còn lại
-  },
-  productList: {
-    paddingBottom: 20,
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: '#555',
-    marginTop: 20,
-  },
-  productCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    alignItems: 'center',
-  },
-  productImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  productDetails: {
     flex: 1,
-    justifyContent: 'center',
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  productStatus: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 5,
-  },
-  productPrice: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 5,
-  },
-  productRating: {
-    fontSize: 14,
-    color: '#555',
   },
 });
 

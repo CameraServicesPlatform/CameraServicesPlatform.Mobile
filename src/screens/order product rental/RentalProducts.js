@@ -29,7 +29,7 @@ const RentalProducts = ({ navigation }) => {
 
   // API gọi về danh sách sản phẩm (rental: status === 1)
   const fetchAllProducts = async (currentFilter) => {
-    let apiUrl = `http://14.225.220.108:2602/product/get-all-product`;
+    let apiUrl = `http://14.225.220.108:2602/product/get-product-by-name`;
     if (currentFilter && currentFilter.trim() !== '') {
       apiUrl = `http://14.225.220.108:2602/product/get-product-by-name?filter=${encodeURIComponent(currentFilter)}`;
     }
