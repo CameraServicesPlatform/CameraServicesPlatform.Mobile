@@ -113,7 +113,7 @@ const ProductDetailModal = ({ visible, productId, onClose }) => {
               // Nếu có priceBuy, hiển thị giá mua và ẩn các field liên quan tới thuê
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Giá mua:</Text>
-                <Text style={styles.infoValue}>{productData.priceBuy} vnđ</Text>
+                <Text style={styles.infoValue}>{productData.priceBuy.toLocaleString()} vnđ</Text>
               </View>
             ) : (
               // Ngược lại, hiển thị các thông tin giá thuê
@@ -121,31 +121,31 @@ const ProductDetailModal = ({ visible, productId, onClose }) => {
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Cọc sản phẩm:</Text>
                   <Text style={styles.infoValue}>
-                    {productData.depositProduct || 'Không có'} vnđ
+                    {productData.depositProduct.toLocaleString() || 'Không có'} vnđ
                   </Text>
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Giá (Thuê)/giờ:</Text>
                   <Text style={styles.infoValue}>
-                    {productData.pricePerHour || 'Không có'} vnđ
+                    {productData.pricePerHour.toLocaleString() || 'Không có'} vnđ
                   </Text>
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Giá (Thuê)/ngày:</Text>
                   <Text style={styles.infoValue}>
-                    {productData.pricePerDay || 'Không có'} vnđ
+                    {productData.pricePerDay.toLocaleString() || 'Không có'} vnđ
                   </Text>
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Giá (Thuê)/tuần:</Text>
                   <Text style={styles.infoValue}>
-                    {productData.pricePerWeek || 'Không có'} vnđ
+                    {productData.pricePerWeek.toLocaleString() || 'Không có'} vnđ
                   </Text>
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Giá (Thuê)/tháng:</Text>
                   <Text style={styles.infoValue}>
-                    {productData.pricePerMonth || 'Không có'} vnđ
+                    {productData.pricePerMonth.toLocaleString() || 'Không có'} vnđ
                   </Text>
                 </View>
               </>

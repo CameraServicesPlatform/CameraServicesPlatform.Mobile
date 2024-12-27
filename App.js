@@ -81,9 +81,9 @@ export default function App() {
 
         {isLoggedIn && (
           <>
-            <Drawer.Screen name="Account" component={AccountStack} options={{ headerShown: true }} />
+            <Drawer.Screen name="Tài khoản" component={AccountStack} options={{ headerShown: true }} />
             <Drawer.Screen
-              name="Logout"
+              name="Đăng xuất"
               component={({ navigation }) => {
                 useEffect(() => {
                   handleLogout(navigation);
