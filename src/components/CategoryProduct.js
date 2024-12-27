@@ -1,20 +1,32 @@
-// CategoryProduct.js
 import React, { useState } from 'react';
-import {
+import { 
   View,
   Text,
   FlatList,
   Image,
   TouchableOpacity,
-  StyleSheet,
+  StyleSheet 
 } from 'react-native';
 
-// Modal hiển thị chi tiết sản phẩm (nếu bạn cần tích hợp)
+// Import modal hiển thị chi tiết (đã có sẵn)
 import ProductDetailModal from './ProductDetailModal';
 
 const CategoryProduct = ({ products }) => {
+  // State để quản lý modal
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Khi bấm vào một sản phẩm => mở modal
+  const handlePressProduct = (productId) => {
+    setSelectedProductId(productId);
+    setModalVisible(true);
+  };
+
+  // Đóng modal
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedProductId(null);
+  };
 
   // Hàm lấy label cho status (nếu cần)
   const getStatusLabel = (status) => {
@@ -32,19 +44,9 @@ const CategoryProduct = ({ products }) => {
     }
   };
 
-  const handlePressProduct = (productId) => {
-    setSelectedProductId(productId);
-    setModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalVisible(false);
-    setSelectedProductId(null);
-  };
-
-  // Hàm render từng sản phẩm trong FlatList
+  // Render cho từng sản phẩm
   const renderProductItem = ({ item }) => {
-    // Kiểm tra xem có priceBuy hay không
+    // Kiểm tra priceBuy (mua) hay không => nếu null/0 thì hiển thị giá thuê
     const hasPriceBuy = item.priceBuy !== null && item.priceBuy !== '' && item.priceBuy !== 0;
 
     return (
@@ -52,37 +54,42 @@ const CategoryProduct = ({ products }) => {
         style={styles.productCard}
         onPress={() => handlePressProduct(item.productID)}
       >
+        {/* Ảnh sản phẩm */}
         <Image
           source={{ uri: item.listImage?.[0]?.image }}
           style={styles.productImage}
         />
+
+        {/* Thông tin cơ bản */}
         <View style={styles.productDetails}>
           <Text style={styles.productName}>{item.productName}</Text>
           <Text style={styles.productStatus}>
             Trạng thái: {getStatusLabel(item.status)}
           </Text>
 
-          {/* Hiển thị giá dựa trên điều kiện */}
+          {/* Hiển thị giá tùy theo priceBuy hay không */}
           {hasPriceBuy ? (
+            // Nếu có priceBuy => giá mua
             <Text style={styles.productPrice}>
-              Giá mua: {item.priceBuy.toLocaleString()} vnđ
+              Giá mua: {item.priceBuy.toLocaleString()} đ
             </Text>
           ) : (
+            // Ngược lại => giá thuê
             <>
               <Text style={styles.productPrice}>
-                Cọc: {item.depositProduct?.toLocaleString() || 'Không có'} vnđ
+                Cọc: {item.depositProduct?.toLocaleString() || 'Không có'} đ
               </Text>
               <Text style={styles.productPrice}>
-                Giá (Thuê)/giờ: {item.pricePerHour?.toLocaleString() || 'Không có'} vnđ
+                Giá (Thuê)/giờ: {item.pricePerHour?.toLocaleString() || 'Không có'} đ
               </Text>
               <Text style={styles.productPrice}>
-                Giá (Thuê)/ngày: {item.pricePerDay?.toLocaleString() || 'Không có'} vnđ
+                Giá (Thuê)/ngày: {item.pricePerDay?.toLocaleString() || 'Không có'} đ
               </Text>
               <Text style={styles.productPrice}>
-                Giá (Thuê)/tuần: {item.pricePerWeek?.toLocaleString() || 'Không có'} vnđ
+                Giá (Thuê)/tuần: {item.pricePerWeek?.toLocaleString() || 'Không có'} đ
               </Text>
               <Text style={styles.productPrice}>
-                Giá (Thuê)/tháng: {item.pricePerMonth?.toLocaleString() || 'Không có'} vnđ
+                Giá (Thuê)/tháng: {item.pricePerMonth?.toLocaleString() || 'Không có'} đ
               </Text>
             </>
           )}
@@ -96,6 +103,7 @@ const CategoryProduct = ({ products }) => {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* Danh sách sản phẩm */}
       <FlatList
         data={products}
         keyExtractor={(item) => item.productID}
@@ -105,7 +113,7 @@ const CategoryProduct = ({ products }) => {
         keyboardShouldPersistTaps="handled"
       />
 
-      {/* Modal chi tiết sản phẩm */}
+      {/* Modal chi tiết sản phẩm (tự fetch dựa trên productId) */}
       <ProductDetailModal
         visible={modalVisible}
         productId={selectedProductId}
@@ -117,6 +125,7 @@ const CategoryProduct = ({ products }) => {
 
 export default CategoryProduct;
 
+// Styles
 const styles = StyleSheet.create({
   productList: {
     paddingBottom: 20,
