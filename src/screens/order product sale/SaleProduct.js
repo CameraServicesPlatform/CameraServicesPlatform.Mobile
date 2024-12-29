@@ -247,7 +247,7 @@ const SaleProducts = ({ navigation }) => {
                     <TouchableOpacity onPress={() => showProductDetail(item)}>
                         <ProductCard
                             item={item}
-                            isFavorite={favorites.some((fav) => fav.productID === item.productID)}
+                            
                             onToggleFavorite={() => addFavorite(item)}
                         />
                     </TouchableOpacity>

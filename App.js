@@ -37,6 +37,7 @@ export default function App() {
       setIsLoggedIn(false);
       Alert.alert('Đăng xuất thành công!');
       navigation.navigate('Home');
+    
     } catch (error) {
       console.error('Lỗi khi xóa dữ liệu:', error);
       Alert.alert('Lỗi', 'Không thể đăng xuất do lỗi hệ thống.');

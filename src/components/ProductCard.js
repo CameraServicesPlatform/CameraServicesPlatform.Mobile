@@ -33,7 +33,8 @@ const ProductCard = ({ item, isFavorite, onToggleFavorite }) => {
         <Ionicons
           name={isFavorite ? 'heart' : 'heart-outline'}
           size={24}
-          color={isFavorite ? 'red' : 'gray'}
+          color={"red"}
+          
         />
       </TouchableOpacity>
 

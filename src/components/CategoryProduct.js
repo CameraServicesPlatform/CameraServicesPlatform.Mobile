@@ -71,25 +71,25 @@ const CategoryProduct = ({ products }) => {
           {hasPriceBuy ? (
             // Nếu có priceBuy => giá mua
             <Text style={styles.productPrice}>
-              Giá mua: {item.priceBuy.toLocaleString()} đ
+              Giá mua: {item.priceBuy.toLocaleString()} vnđ
             </Text>
           ) : (
             // Ngược lại => giá thuê
             <>
               <Text style={styles.productPrice}>
-                Cọc: {item.depositProduct?.toLocaleString() || 'Không có'} đ
+                Cọc: {item.depositProduct?.toLocaleString() || 'Không có'} vnđ
               </Text>
               <Text style={styles.productPrice}>
-                Giá (Thuê)/giờ: {item.pricePerHour?.toLocaleString() || 'Không có'} đ
+                Giá (Thuê)/giờ: {item.pricePerHour?.toLocaleString() || 'Không có'} vnđ
               </Text>
               <Text style={styles.productPrice}>
-                Giá (Thuê)/ngày: {item.pricePerDay?.toLocaleString() || 'Không có'} đ
+                Giá (Thuê)/ngày: {item.pricePerDay?.toLocaleString() || 'Không có'} vnđ
               </Text>
               <Text style={styles.productPrice}>
-                Giá (Thuê)/tuần: {item.pricePerWeek?.toLocaleString() || 'Không có'} đ
+                Giá (Thuê)/tuần: {item.pricePerWeek?.toLocaleString() || 'Không có'} vnđ
               </Text>
               <Text style={styles.productPrice}>
-                Giá (Thuê)/tháng: {item.pricePerMonth?.toLocaleString() || 'Không có'} đ
+                Giá (Thuê)/tháng: {item.pricePerMonth?.toLocaleString() || 'Không có'} vnđ
               </Text>
             </>
           )}

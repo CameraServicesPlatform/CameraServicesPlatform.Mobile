@@ -102,7 +102,6 @@ const SettingsScreen = () => {
         renderItem={({ item }) => (
           <ProductCard
             item={item}
-            isFavorite={true}
             onToggleFavorite={() => removeFavorite(item.wishlistID)} // Xóa sản phẩm khỏi danh sách yêu thích
           />
         )}

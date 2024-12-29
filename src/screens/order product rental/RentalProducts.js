@@ -262,7 +262,7 @@ const RentalProducts = ({ navigation }) => {
           <TouchableOpacity onPress={() => showProductDetail(item)}>
             <RentalProductCard
               item={item}
-              isFavorite={favorites.some((fav) => fav.productID === item.productID)}
+              
               onToggleFavorite={() => addFavorite(item)}
             />
           </TouchableOpacity>
