@@ -115,48 +115,57 @@ const AccountDetails = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {img && <Image source={{ uri: img }} style={styles.profileImage} />}
       <ScrollView style={styles.scrollContainer}>
         <Text style={styles.title}>Thông tin Tài khoản</Text>
+        {img ? (
+          <Image source={{ uri: img }} style={styles.profileImage} />
+        ) : (
+          <Text style={styles.placeholderTextProImg}>Chưa có ảnh đại diện</Text>
+        )}
+         <Text style={styles.item}>
+          <Text style={styles.label}>Họ: </Text>
+          {firstName}
+          <Text style={styles.label}> Tên: </Text>
+          {lastName}
+        </Text>
         <Text style={styles.item}>
           <Text style={styles.label}>Số điện thoại: </Text>
           {phoneNumber}
         </Text>
-        <Text style={styles.item}>
-          <Text style={styles.label}>Họ: </Text>
-          {firstName}
-        </Text>
-        <Text style={styles.item}>
-          <Text style={styles.label}>Tên: </Text>
-          {lastName}
-        </Text>
+       
         <Text style={styles.item}>
           <Text style={styles.label}>Nghề nghiệp: </Text>
-          {job !== null && job >= 0 && job < jobOptions.length ? jobOptions[job] : 'Trống'}
-        </Text>
+          {job !== null && job >= 0 && job < jobOptions.length ? (
+            jobOptions[job]
+          ) : (
+            <Text style={styles.placeholderText}>Trống</Text>
+          )}        </Text>
         <Text style={styles.item}>
           <Text style={styles.label}>Sở thích: </Text>
-          {hobby !== null && hobby >= 0 && hobby < hobbyOptions.length ? hobbyOptions[hobby] : 'Trống'}
-        </Text>
+          {hobby !== null && hobby >= 0 && hobby < hobbyOptions.length ? (
+            <Text style={styles.placeholderText}>{hobbyOptions[hobby]}</Text>
+          ) : (
+            <Text style={styles.placeholderText}>Trống</Text>
+          )}        </Text>
         <Text style={styles.item}>
           <Text style={styles.label}>Giới tính: </Text>
-          {genderDisplay}
+          {genderDisplay !== null ? <Text>{genderDisplay}</Text> : <Text style={styles.placeholderText}>Trống</Text>}
         </Text>
         <Text style={styles.item}>
           <Text style={styles.label}>Địa chỉ: </Text>
-          {address}
+          {address !== null ? <Text>{address}</Text> : <Text style={styles.placeholderText}>Trống</Text>}
         </Text>
         <Text style={styles.label}>Ảnh CMND mặt trước:</Text>
         {frontOfCitizenIdentificationCard ? (
           <Image source={{ uri: frontOfCitizenIdentificationCard }} style={styles.image} />
         ) : (
-          <Text style={styles.item}>Trống</Text>
+          <Text style={styles.placeholderText}>Chưa có ảnh</Text>
         )}
         <Text style={styles.label}>Ảnh CMND mặt sau:</Text>
         {backOfCitizenIdentificationCard ? (
           <Image source={{ uri: backOfCitizenIdentificationCard }} style={styles.image} />
         ) : (
-          <Text style={styles.item}>Trống</Text>
+          <Text style={styles.placeholderText}>Chưa có ảnh</Text>
         )}
       </ScrollView>
       <View style={styles.buttonContainer}>
@@ -200,10 +209,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   image: {
-    width: 150,
+    width: 250,
     height: 150,
     borderRadius: 10,
     marginVertical: 10,
+    padding: 10,
   },
   profileImage: {
     width: 200,
@@ -211,10 +221,20 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     alignSelf: 'center',
     marginTop: 20,
+    marginBottom: 20,
   },
   buttonContainer: {
     padding: 10,
     backgroundColor: '#fff',
+  },
+  placeholderText: {
+    textAlign: 'center',
+    color: '#aaa',
+  },
+  placeholderTextProImg: {
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#aaa',
   },
 });
 

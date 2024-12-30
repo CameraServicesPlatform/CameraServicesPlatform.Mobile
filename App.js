@@ -69,7 +69,6 @@ export default function App() {
         <Drawer.Screen name="RentalProduct" component={RentalProduct} options={{ headerShown: true, title: 'Sản phẩm thuê' }} />
         <Drawer.Screen name="ProductSale" component={ProductSaleStack} options={{ headerShown: true, title: 'Sản phẩm bán' }} />
         <Drawer.Screen name="Policy" component={Policy} options={{ headerShown: true, title: 'Chính sách' }} />
-        <Drawer.Screen name="Favorites" component={SettingsScreen} options={{ headerShown: true, title: 'Yêu thích' }} />
         <Drawer.Screen name="Contact" component={Contact} options={{ headerShown: true, title: 'Liên hệ' }} />
 
         {!isLoggedIn && (
@@ -81,6 +80,7 @@ export default function App() {
 
         {isLoggedIn && (
           <>
+            <Drawer.Screen name="Favorites" component={SettingsScreen} options={{ headerShown: true, title: 'Yêu thích' }} />
             <Drawer.Screen name="Tài khoản" component={AccountStack} options={{ headerShown: true }} />
             <Drawer.Screen
               name="Đăng xuất"
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   logo: {
-    width: 300,
+    width: 200,
     height: 100,
 
   },

@@ -170,7 +170,7 @@ const UpdateAccount = ({ route, navigation }) => {
                 style={styles.picker}
                 onValueChange={(itemValue) => setJob(itemValue)}
             >
-                <Picker.Item label="Khác" value={null} />
+                <Picker.Item label="Chưa cócó" value={null} />
                 <Picker.Item label="Học sinh" value={0} />
                 <Picker.Item label="Nhiếp ảnh chuyên nghiệp" value={1} />
                 <Picker.Item label="Nhiếp ảnh tự do" value={2} />
@@ -187,7 +187,7 @@ const UpdateAccount = ({ route, navigation }) => {
                 style={styles.picker}
                 onValueChange={(itemValue) => setHobby(itemValue)}
             >
-                <Picker.Item label="Khác" value={null} />
+                <Picker.Item label="Chưa có" value={null} />
                 <Picker.Item label="Chụp ảnh phong cảnh" value={0} />
                 <Picker.Item label="Chụp ảnh chân dung" value={1} />
                 <Picker.Item label="Chụp ảnh động vật hoang dã" value={2} />

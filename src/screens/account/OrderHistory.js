@@ -10,21 +10,22 @@ import {
 import { Picker } from '@react-native-picker/picker'; // Thêm thư viện Picker
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ORDER_STATUS_MAP = [
-  'Pending',
-  'Approved',
-  'Completed',
-  'Placed',
-  'Shipped',
-  'PaymentFail',
-  'Canceling',
-  'Cancelled',
-  'Payment',
-  'PendingRefund',
-  'Refund',
-  'DepositReturn',
-  'Extend',
-];
+const ORDER_STATUS_MAP = {
+  0: { label: "Đang xử lý", color: "#ff9900" },
+  1: { label: "Đã phê duyệt", color: "#007bff" },
+  2: { label: "Hoàn thành", color: "#28a745" },
+  3: { label: "Đã đặt", color: "#17a2b8" },
+  4: { label: "Đã giao hàng", color: "#6f42c1" },
+  5: { label: "Thanh toán thất bại", color: "#dc3545" },
+  6: { label: "Đang hủy", color: "#ffc107" },
+  7: { label: "Đã hủy", color: "#dc3545" },
+  8: { label: "Đã thanh toán", color: "#20c997" },
+  9: { label: "Đang hoàn tiền", color: "#ff9800" },
+  10: { label: "Đã hoàn tiền", color: "#4caf50" },
+  11: { label: "Trả cọc", color: "#9c27b0" },
+  12: { label: "Gia hạn", color: "#3f51b5" },
+  default: { label: "Không xác định", color: "#555" },
+};
 
 const OrderHistory = ({ navigation }) => {
   const [orders, setOrders] = useState([]);
@@ -100,7 +101,8 @@ const OrderHistory = ({ navigation }) => {
   });
 
   const renderOrder = ({ item }) => {
-    const orderStatus = ORDER_STATUS_MAP[item.orderStatus] || 'Không xác định';
+    const orderStatus =
+    ORDER_STATUS_MAP[item.orderStatus] || ORDER_STATUS_MAP.default;
     const orderType = item.orderType === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng';
     const orderDate = new Date(item.orderDate).toLocaleString();
 
@@ -121,7 +123,7 @@ const OrderHistory = ({ navigation }) => {
         </Text>
         <Text style={styles.text}>
           <Text style={styles.label}>Trạng thái: </Text>
-          {orderStatus}
+          <Text style={{ color: orderStatus.color }}>{orderStatus.label}</Text>
         </Text>
         <Text style={styles.text}>
           <Text style={styles.label}>Tổng tiền: </Text>
