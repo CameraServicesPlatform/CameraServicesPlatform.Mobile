@@ -122,11 +122,21 @@ const UpdateAccount = ({ route, navigation }) => {
 
             if (data.isSuccess) {
                 Alert.alert('Thành công', 'Cập nhật tài khoản thành công!', [
-                    { text: 'OK', onPress: () => navigation.goBack() },
+                    {
+                        text: 'OK',
+                        onPress: () => {
+                            // Reload trang trước và quay lại
+                            navigation.goBack();
+                            if (route.params?.onUpdateSuccess) {
+                                route.params.onUpdateSuccess(); // Gọi hàm refresh từ trang trước
+                            }
+                        },
+                    },
                 ]);
             } else {
                 Alert.alert('Lỗi', 'Không thể cập nhật tài khoản.');
             }
+            
         } catch (error) {
             console.error('Error updating account:', error.message);
             Alert.alert('Lỗi', `Đã xảy ra lỗi: ${error.message}`);

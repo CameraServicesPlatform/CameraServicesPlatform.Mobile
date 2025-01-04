@@ -5,10 +5,31 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Button,
+  Alert,
 } from 'react-native';
 
-const OrderDetail = ({ route }) => {
-  const { orderID } = route.params || {};
+const ORDER_STATUS_DETAILS = {
+  0: { text: "Chờ xử lý", color: "blue" },
+  1: { text: "Sản phẩm sẵn sàng được giao", color: "green" },
+  2: { text: "Hoàn thành", color: "yellow" },
+  3: { text: "Đã nhận sản phẩm", color: "purple" },
+  4: { text: "Đã giao hàng", color: "cyan" },
+  5: { text: "Thanh toán thất bại", color: "cyan" },
+  6: { text: "Đang hủy", color: "lime" },
+  7: { text: "Đã hủy thành công", color: "red" },
+  8: { text: "Đã Thanh toán", color: "orange" },
+  9: { text: "Hoàn tiền đang chờ xử lý", color: "pink" },
+  10: { text: "Hoàn tiền thành công", color: "brown" },
+  11: { text: "Hoàn trả tiền đặt cọc", color: "gold" },
+  12: { text: "Gia hạn", color: "violet" },
+};
+const ORDER_TYPE_DETAILS = {
+  0: "Mua",
+  1: "Thuê",
+};
+const OrderDetail = ({ route, navigation  }) => {
+  const { orderID, rentalStartDate, rentalEndDate, returnDate, orderStatus, orderType, deliveriesMethod, rentalStartDateRaw } = route.params || {};
   const [orderDetails, setOrderDetails] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,6 +45,7 @@ const OrderDetail = ({ route }) => {
         const data = await response.json();
         if (data.isSuccess && data.result) {
           setOrderDetails(data.result);
+          console.log(orderID)
         } else {
           console.error('Dữ liệu trả về không hợp lệ:', data.messages);
         }
@@ -39,6 +61,28 @@ const OrderDetail = ({ route }) => {
     }
   }, [orderID]);
 
+  const reloadOrderDetails = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://14.225.220.108:2602/orderDetail/get-order-details/${orderID}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.isSuccess && data.result) {
+        setOrderDetails(data.result);
+      } else {
+        console.error('Dữ liệu trả về không hợp lệ:', data.messages);
+      }
+    } catch (error) {
+      console.error('Lỗi khi gọi API:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Render từng chi tiết đơn hàng
   const renderOrderDetailItem = ({ item }) => {
     const {
@@ -48,14 +92,75 @@ const OrderDetail = ({ route }) => {
       discount,
       periodRental,
       productQuality,
-      product, // Bên trong có productDescription, depositProduct...
+      product // Bên trong có productDescription, depositProduct...
     } = item;
-
+  
     // Ép kiểu periodRental nếu có
     let periodRentalDisplay = null;
     if (periodRental) {
       periodRentalDisplay = new Date(periodRental).toLocaleString();
     }
+
+    const handlePickup = async () => {
+      try {
+        const response = await fetch(`http://14.225.220.108:2602/order/update-order-status-placed/${orderID}`, {
+          method: 'PUT',
+        });
+        if (response.ok) {
+          Alert.alert('Thành công', 'Trạng thái đã được cập nhật thành công.');
+          reloadOrderDetails();
+        } else {
+          throw new Error('Cập nhật trạng thái thất bại.');
+        }
+      } catch (error) {
+        console.error('Lỗi:', error);
+        Alert.alert('Lỗi', 'Không thể cập nhật trạng thái.');
+      }
+    };
+
+    const handleReturn = async () => {
+      const returnDate = new Date().toISOString();
+      const body = {
+        orderID,
+        returnDate,
+        condition: "",
+      };
+
+      try {
+        const response = await fetch('http://14.225.220.108:2602/returnDetail/create-return-for-member', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+        if (response.ok) {
+          Alert.alert('Thành công', 'Đã tạo yêu cầu trả hàng thành công.');
+          reloadOrderDetails();
+        } else {
+          throw new Error('Tạo yêu cầu trả hàng thất bại.');
+        }
+      } catch (error) {
+        console.error('Lỗi:', error);
+        Alert.alert('Lỗi', 'Không thể tạo yêu cầu trả hàng.');
+      }
+    };
+
+    const handleExtend = () => {
+      // Điều hướng sang trang OrderExtend
+      navigation.navigate('OrderExtend', {
+        // Truyền các tham số (params) cần thiết
+        orderID,
+        rentalStartDate,
+        rentalEndDate,
+        returnDate,
+        orderStatus,
+        orderType,
+        deliveriesMethod,
+        product,
+        rentalStartDateRaw
+      });
+    };
 
     return (
       <View style={styles.detailContainer}>
@@ -101,12 +206,53 @@ const OrderDetail = ({ route }) => {
           </Text>
         )}
 
-        {/* periodRental nếu != null */}
-        {periodRentalDisplay && (
+        {orderStatus !== undefined && (
+          <Text style={[styles.statusText, { color: ORDER_STATUS_DETAILS[orderStatus]?.color }]}
+          >
+            <Text style={styles.label}>Trạng thái đơn hàng: </Text>
+            {ORDER_STATUS_DETAILS[orderStatus]?.text || "Không xác định"}
+          </Text>
+        )}
+        {orderType !== undefined && (
+        <Text style={styles.infoText}>
+          <Text style={styles.label}>Loại đơn hàng: </Text>
+          {ORDER_TYPE_DETAILS[orderType] || "Không xác định"}
+        </Text>
+        )}
+
+        {/* Ngày thuê (nếu có) */}
+        {rentalStartDate && (
           <Text style={styles.infoText}>
             <Text style={styles.label}>Ngày thuê: </Text>
-            {periodRentalDisplay}
+            {rentalStartDate}
           </Text>
+        )}
+
+        {/* Ngày hết hạn thuê (nếu có) */}
+        {rentalEndDate && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Ngày hết hạn thuê: </Text>
+            {rentalEndDate}
+          </Text>
+        )}
+
+        {/* Ngày trả thiết bị (nếu có) */}
+        {returnDate && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Ngày trả thiết bị: </Text>
+            {returnDate}
+          </Text>
+        )}
+
+        {/* Thêm nút chức năng */}
+        {orderStatus === 1 && deliveriesMethod === 0 && (
+          <Button title="Đến nhận" onPress={handlePickup} />
+        )}
+        {orderStatus === 3 && orderType === 0 && (
+          <Button title="Trả hàng" onPress={handleReturn} />
+        )}
+        {orderStatus === 3 && orderType === 1 && (
+          <Button title="Gia hạn" onPress={handleExtend} />
         )}
       </View>
     );

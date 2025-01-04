@@ -1,3 +1,4 @@
+// OrderExtend.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -12,93 +13,104 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const OrderProductRental = ({ route, navigation }) => {
-  const { productID } = route.params || {};
-  const [product, setProduct] = useState(null);
+const OrderExtend = ({ route, navigation }) => {
+  const {
+    orderID,
+    rentalStartDate,
+    rentalStartDateRaw,
+    returnDate,
+    orderStatus,
+    orderType,
+    deliveriesMethod,
+    product,
+  } = route.params || {};
+
+  // Kiểm tra rentalStartDateRaw hợp lệ để đặt computedStartDate
+  let computedStartDate;
+  if (rentalStartDateRaw && !isNaN(new Date(rentalStartDateRaw).getTime())) {
+    computedStartDate = new Date(rentalStartDateRaw);
+  } else {
+    console.warn('rentalStartDateRaw không hợp lệ. Sử dụng ngày hiện tại');
+    console.log("rentalStartDateRaw123", rentalStartDateRaw);
+    computedStartDate = new Date();
+  }
+
+  // ----------------------------
+  // State quản lý
+  // ----------------------------
   const [loading, setLoading] = useState(true);
+  const [serverProduct, setServerProduct] = useState(null);
 
   // Đơn vị thời gian: hour, day, week, month
   const [unit, setUnit] = useState('hour');
-  // Giá trị thời gian
+  // Số giờ/ngày/tuần/tháng
   const [value, setValue] = useState('');
 
-  // Thời gian bắt đầu, kết thúc thuê, và ngày trả
-  const [startDate, setStartDate] = useState(() => {
-    const now = new Date();
-    const currentHour = now.getHours();
-  
-    if (currentHour < 8 || currentHour > 20) {
-      // Nếu trước 8h sáng hoặc sau 20h tối, thiết lập 8h sáng ngày hôm sau
-      const nextDay = new Date(now);
-      nextDay.setDate(now.getDate() + 1); // Chuyển sang ngày hôm sau
-      nextDay.setHours(8, 0, 0, 0); // Đặt giờ là 8:00:00 sáng
-      return nextDay;
-    }
-  
-    return now; // Nếu trong khoảng 8h - 20h, dùng thời gian hiện tại
-  });
-  
+  // Thời gian bắt đầu, kết thúc, và ngày trả
+  const [startDate, setStartDate] = useState(computedStartDate);
   const [endDate, setEndDate] = useState(null);
-  const [returnDate, setReturnDate] = useState(null);
+  const [finalReturnDate, setFinalReturnDate] = useState(null);
 
   // Tổng giá tiền
   const [totalPrice, setTotalPrice] = useState(0);
 
-  // Điều khiển hiển thị DatePicker, TimePicker
+  // Điều khiển hiển thị DatePicker / TimePicker
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  // Hàm chuyển định dạng chuỗi ISO thành "HH:mm DD/MM/YYYY"
+  // Hàm format ISO => "HH:mm DD/MM/YYYY"
   const formatDateTime = (isoString) => {
     if (!isoString) return 'Không có';
-
     const dateObj = new Date(isoString);
-
-    // Lấy ngày/tháng/năm
-    const day = dateObj.getDate().toString().padStart(2, '0');       // Thêm '0' nếu chỉ có 1 chữ số
+    const day = dateObj.getDate().toString().padStart(2, '0');
     const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
     const year = dateObj.getFullYear().toString();
-
-    // Lấy giờ/phút
-    const hours = dateObj.getHours().toString().padStart(2, '0');    // Thêm '0' nếu chỉ có 1 chữ số
+    const hours = dateObj.getHours().toString().padStart(2, '0');
     const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-
-    // Format lại theo "HH:mm DD/MM/YYYY"
     return `${hours}:${minutes} ${day}/${month}/${year}`;
   };
-  // Lấy thông tin chi tiết sản phẩm
+
+  // ----------------------------
+  // 1) Gọi API lấy product theo productID
+  // ----------------------------
   useEffect(() => {
-    const fetchProductDetails = async () => {
+    if (!product || !product.productID) {
+      Alert.alert('Lỗi', 'Không có thông tin productID để lấy sản phẩm từ server.');
+      setLoading(false);
+      return;
+    }
+
+    const fetchServerProduct = async () => {
       try {
         const response = await fetch(
-          `http://14.225.220.108:2602/product/get-product-by-id?id=${productID}`
+          `http://14.225.220.108:2602/product/get-product-by-id?id=${product.productID}`
         );
         const data = await response.json();
 
-        if (data.isSuccess) {
-          setProduct(data.result);
+        if (data.isSuccess && data.result) {
+          setServerProduct(data.result);
         } else {
-          Alert.alert('Lỗi', 'Không thể lấy thông tin sản phẩm.');
+          Alert.alert('Lỗi', 'Không lấy được thông tin sản phẩm từ server.');
         }
       } catch (error) {
-        console.error('Lỗi khi gọi API:', error);
         Alert.alert('Lỗi', 'Không thể kết nối tới máy chủ.');
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (productID) {
-      fetchProductDetails();
-    }
-  }, [productID]);
+    fetchServerProduct();
+  }, [product]);
 
-  // Tính toán ngày kết thúc, ngày trả, và tổng giá thuê
+  // ----------------------------
+  // 2) Tính toán ngày kết thúc, ngày trả, và tổng giá
+  // ----------------------------
   useEffect(() => {
-    // Nếu người dùng chưa nhập đủ dữ liệu hoặc chưa có product, reset
-    if (!value || isNaN(value) || value <= 0 || !product) {
+    if (!value || isNaN(value) || value <= 0 || !serverProduct) {
       setEndDate(null);
-      setReturnDate(null);
+      setFinalReturnDate(null);
+      setTotalPrice(0);
       return;
     }
 
@@ -106,26 +118,32 @@ const OrderProductRental = ({ route, navigation }) => {
       const start = new Date(startDate);
       const end = new Date(start);
 
+      // Kiểm tra: nếu đơn vị là 'hour'
+      if (unit === 'hour') {
+        // Giờ bắt đầu < 19
+        if (start.getHours() >= 19) {
+          Alert.alert(
+            'Không thể gia hạn',
+            'Chỉ gia hạn theo giờ trước 19h (vì cho thuê đến 20h).'
+          );
+          setEndDate(null);
+          setFinalReturnDate(null);
+          setTotalPrice(0);
+          return;
+        }
+      }
+
       switch (unit) {
         case 'hour':
-          // Kiểm tra số giờ thuê không vượt quá 8
           if (value > 8) {
             Alert.alert('Lỗi', 'Giá trị thời gian không được vượt quá 8 giờ.');
             return;
           }
-
-          // Cộng giờ theo giá trị nhập
           end.setHours(start.getHours() + parseInt(value));
-
-          // **Kiểm tra giờ bắt đầu & giờ kết thúc (7h - 18h)**
-          if (start.getHours() < 8 || end.getHours() > 20) {
-            Alert.alert(
-              'Lỗi',
-              'Chỉ cho thuê giờ trong khoảng từ 8h đến 20h. Vui lòng chọn lại thời gian!'
-            );
-            // Reset
+          if (end.getHours() > 20) {
+            Alert.alert('Không thể gia hạn', 'Thời gian gia hạn vượt quá 20h.');
             setEndDate(null);
-            setReturnDate(null);
+            setFinalReturnDate(null);
             setTotalPrice(0);
             return;
           }
@@ -159,32 +177,50 @@ const OrderProductRental = ({ route, navigation }) => {
           break;
       }
 
-      // Gán endDate
       setEndDate(end);
 
-      // Tính returnDate (thêm 1 giờ sau endDate)
-      const returnTime = new Date(end);
-      returnTime.setHours(end.getHours() + 1);
-      setReturnDate(returnTime);
+      // Thêm 1h cho finalReturnDate
+      const tmpReturn = new Date(end);
+      tmpReturn.setHours(end.getHours() + 1);
+      setFinalReturnDate(tmpReturn);
 
-      // Tính tổng tiền thuê
+      // Tính tiền
       const rentalPrice =
         unit === 'hour'
-          ? product.pricePerHour * value
+          ? serverProduct.pricePerHour * value
           : unit === 'day'
-            ? product.pricePerDay * value
-            : unit === 'week'
-              ? product.pricePerWeek * value
-              : product.pricePerMonth * value;
+          ? serverProduct.pricePerDay * value
+          : unit === 'week'
+          ? serverProduct.pricePerWeek * value
+          : serverProduct.pricePerMonth * value;
 
-      // Tổng tiền = tiền đặt cọc + tiền thuê
-      setTotalPrice(product.depositProduct + rentalPrice);
+      setTotalPrice(serverProduct.depositProduct + rentalPrice);
     };
 
     calculateDates();
-  }, [value, unit, startDate, product]);
+  }, [value, unit, startDate, serverProduct]);
 
-  // Nếu đang tải dữ liệu
+  // ----------------------------
+  // 3) Map unit -> durationUnit (0,1,2,3)
+  // ----------------------------
+  const mapUnitToNumber = (u) => {
+    switch (u) {
+      case 'hour':
+        return 0;
+      case 'day':
+        return 1;
+      case 'week':
+        return 2;
+      case 'month':
+        return 3;
+      default:
+        return 0; // Mặc định
+    }
+  };
+
+  // ----------------------------
+  // 4) Giao diện
+  // ----------------------------
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -196,48 +232,48 @@ const OrderProductRental = ({ route, navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.container}>
-        {product ? (
+        {serverProduct ? (
           <>
-            {/* Ảnh sản phẩm (nếu có) */}
-            {!!product.listImage?.length && (
+            {!!serverProduct.listImage?.length && (
               <Image
-                source={{ uri: product.listImage[0].image }}
+                source={{ uri: serverProduct.listImage[0].image }}
                 style={styles.productImage}
               />
             )}
 
-            <Text style={styles.title}>{product.productName}</Text>
+            <Text style={styles.title}>
+              {serverProduct.productName || 'Sản phẩm không xác định'}
+            </Text>
 
             <View style={styles.infoContainer}>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Giá cọc:</Text> {product.depositProduct} vnđ
+                <Text style={styles.infoLabel}>Giá cọc: </Text>
+                {serverProduct.depositProduct} vnđ
               </Text>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Thuê theo giờ:</Text> {product.pricePerHour} vnđ
+                <Text style={styles.infoLabel}>Thuê theo giờ: </Text>
+                {serverProduct.pricePerHour} vnđ
               </Text>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Thuê theo ngày:</Text> {product.pricePerDay} vnđ
+                <Text style={styles.infoLabel}>Thuê theo ngày: </Text>
+                {serverProduct.pricePerDay} vnđ
               </Text>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Thuê theo tuần:</Text> {product.pricePerWeek} vnđ
+                <Text style={styles.infoLabel}>Thuê theo tuần: </Text>
+                {serverProduct.pricePerWeek} vnđ
               </Text>
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Thuê theo tháng:</Text> {product.pricePerMonth} vnđ
+                <Text style={styles.infoLabel}>Thuê theo tháng: </Text>
+                {serverProduct.pricePerMonth} vnđ
               </Text>
             </View>
-            {/* Chọn ngày & giờ bắt đầu */}
-            <Text style={styles.label}>Ngày bắt đầu thuê:</Text>
+
+            <Text style={styles.label}>Ngày bắt đầu gia hạn:</Text>
             <View style={styles.buttonGroup}>
-              <Button
-                title="Chọn ngày"
-                onPress={() => setShowDatePicker(true)}
-              />
-              <Button
-                title="Chọn giờ"
-                onPress={() => setShowTimePicker(true)}
-              />
+              <Button title="Chọn ngày" onPress={() => setShowDatePicker(true)} />
+              <Button title="Chọn giờ" onPress={() => setShowTimePicker(true)} />
             </View>
-            {/* Chọn đơn vị thời gian */}
+
             <Text style={styles.label}>Đơn vị thời gian:</Text>
             <Picker
               selectedValue={unit}
@@ -250,7 +286,6 @@ const OrderProductRental = ({ route, navigation }) => {
               <Picker.Item label="Tháng" value="month" />
             </Picker>
 
-            {/* Nhập giá trị thời gian (giờ, ngày, tuần, tháng) */}
             <Text style={styles.label}>Giá trị thời gian:</Text>
             <TextInput
               style={styles.input}
@@ -260,9 +295,6 @@ const OrderProductRental = ({ route, navigation }) => {
               placeholder="Nhập số giờ/ngày/tuần/tháng..."
             />
 
-            
-
-            {/* Date picker */}
             {showDatePicker && (
               <DateTimePicker
                 value={startDate}
@@ -277,7 +309,6 @@ const OrderProductRental = ({ route, navigation }) => {
               />
             )}
 
-            {/* Time picker */}
             {showTimePicker && (
               <DateTimePicker
                 value={startDate}
@@ -296,33 +327,36 @@ const OrderProductRental = ({ route, navigation }) => {
             )}
 
             <Text style={styles.text}>
-              Ngày bắt đầu: {formatDateTime(startDate?.toISOString()) || 'Chưa xác định'}
+              Ngày bắt đầu gia hạn: {formatDateTime(startDate?.toISOString())}
             </Text>
             <Text style={styles.text}>
-              Ngày kết thúc thuê: {formatDateTime(endDate?.toISOString()) || 'Chưa xác định'}
+              Ngày kết thúc thuê: {formatDateTime(endDate?.toISOString())}
             </Text>
             <Text style={styles.text}>
-              Ngày trả hàng: {formatDateTime(returnDate?.toISOString()) || 'Chưa xác định'}
+              Ngày trả hàng: {formatDateTime(finalReturnDate?.toISOString())}
             </Text>
-
             <Text style={styles.totalText}>
               Tổng giá tiền: {totalPrice.toLocaleString()} vnđ
             </Text>
 
-            {/* Nút chuyển sang trang ShippingMethod */}
             <Button
-              title="Tiếp theo"
-              onPress={() =>
-                navigation.navigate('ShippingMethod', {
-                  productID,
-                  startDate: startDate.toISOString(),
-                  endDate: endDate?.toISOString(),
-                  returnDate: returnDate?.toISOString(),
-                  totalPrice,
-                  durationUnit: unit,      // Đơn vị (hour, day, week, month)
-                  durationValue: parseInt(value), // Giá trị thời gian
-                })
-              }
+              title="Tiếp tục hoặc Gửi Gia hạn"
+              onPress={() => {
+                // map unit -> number
+                const numericUnit = mapUnitToNumber(unit);
+
+                navigation.navigate('ConfirmExtend', {
+                  orderID,
+                  extendData: {
+                    startDate: startDate.toISOString(),
+                    endDate: endDate?.toISOString(),
+                    returnDate: finalReturnDate?.toISOString(),
+                    totalPrice,
+                    durationUnit: numericUnit,      // <--- Thay đổi ở đây
+                    durationValue: parseInt(value), // Số giờ/ngày/tuần/tháng
+                  },
+                });
+              }}
             />
           </>
         ) : (
@@ -333,18 +367,17 @@ const OrderProductRental = ({ route, navigation }) => {
   );
 };
 
+export default OrderExtend;
+
 const styles = StyleSheet.create({
-  // ScrollView
   scrollContent: {
-    paddingBottom: 40, // chừa khoảng trống dưới cùng để không bị che nội dung
+    paddingBottom: 40,
   },
-  // Container chính
   container: {
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
   },
-  // Khi đang loading
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -354,7 +387,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  // Ảnh sản phẩm
   productImage: {
     width: '100%',
     height: 220,
@@ -362,7 +394,6 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     marginBottom: 20,
   },
-  // Tiêu đề sản phẩm
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -370,7 +401,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333',
   },
-  // Phần thông tin nhóm
   infoContainer: {
     marginBottom: 20,
     backgroundColor: '#F8F8F8',
@@ -384,19 +414,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginVertical: 3,
   },
-  // Nhãn
   label: {
     fontSize: 16,
     fontWeight: '600',
     marginVertical: 10,
   },
-  // Picker
   picker: {
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  // Input
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -404,19 +431,16 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 20,
   },
-  // Button group
   buttonGroup: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
   },
-  // Text chung
   text: {
     fontSize: 16,
     marginBottom: 10,
     color: '#333',
   },
-  // Tổng tiền
   totalText: {
     fontSize: 18,
     fontWeight: '600',
@@ -424,12 +448,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#d9534f',
   },
-  // Khi lỗi
   errorText: {
     fontSize: 18,
     color: 'red',
     textAlign: 'center',
   },
 });
-
-export default OrderProductRental;

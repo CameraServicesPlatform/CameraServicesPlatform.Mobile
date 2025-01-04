@@ -86,7 +86,7 @@ const HomeScreen = ({ navigation }) => {
             const data = await response.json();
             if (data.isSuccess) {
                 Alert.alert('Thành công', 'Đã thêm vào danh sách yêu thích.');
-                setFavorites((prevFavorites) => [...prevFavorites, item]);
+                
                 navigation.navigate('Favorites', { reload: true });
             } else {
                 Alert.alert('Cảm ơn bạn', 'Đây là sản phẩm yêu thích');

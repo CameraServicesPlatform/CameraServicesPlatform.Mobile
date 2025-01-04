@@ -12,20 +12,21 @@ const SettingsScreen = () => {
     try {
       const accountID = await AsyncStorage.getItem('accountId');
       console.log('accountID:', accountID);
-
+  
       if (!accountID) {
-        Alert.alert('Lỗi', 'Không tìm thấy thông tin tài khoản.');
+        Alert.alert('Thông báo', 'Vui lòng đăng nhập');
+        setFavorites([]); // Reset danh sách yêu thích
         setLoading(false);
         return;
       }
-
+  
       const response = await fetch(
         `http://14.225.220.108:2602/wishlist/get-wish-list-by-member-id?AccountID=${accountID}`
       );
       const data = await response.json();
-
+  
       console.log('Dữ liệu từ API:', data.result.items);
-
+  
       if (data.isSuccess) {
         const favoritesWithDetails = await Promise.all(
           data.result.items.map(async (favorite) => {
@@ -39,14 +40,17 @@ const SettingsScreen = () => {
         setFavorites(favoritesWithDetails);
       } else {
         Alert.alert('Lỗi', 'Không thể lấy danh sách yêu thích.');
+        setFavorites([]); // Reset nếu không thành công
       }
     } catch (error) {
       console.error('Error fetching favorites:', error);
       Alert.alert('Lỗi', 'Đã xảy ra lỗi khi lấy danh sách yêu thích.');
+      setFavorites([]); // Reset khi xảy ra lỗi
     } finally {
       setLoading(false);
     }
   };
+  
 
   const removeFavorite = async (wishlistID) => {
     try {

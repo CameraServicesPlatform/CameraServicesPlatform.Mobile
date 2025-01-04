@@ -18,11 +18,18 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#ffffff",
+        "allowHttp": true
+      },
+      "package": "com.truc522002.camera"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2d42732e-a390-4d2f-9172-e68fab477f39"
+      }
     }
   }
 }

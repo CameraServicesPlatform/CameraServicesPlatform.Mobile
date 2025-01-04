@@ -1,55 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Button, Image, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const AccountDetails = ({ navigation }) => {
   const [accountDetails, setAccountDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accountID, setAccountID] = useState(null);
 
-  useEffect(() => {
-    const fetchAccountDetails = async () => {
-      try {
-        const storedAccountID = await AsyncStorage.getItem('accountId');
-        if (!storedAccountID) {
-          console.error('Không tìm thấy accountID');
-          setLoading(false);
-          return;
-        }
-        setAccountID(storedAccountID);
-
-        const response = await fetch(
-          `http://14.225.220.108:2602/account/get-account-by-userId/${storedAccountID}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.isSuccess && data.result) {
-          setAccountDetails(data.result);
-        } else {
-          console.error('Lỗi khi lấy thông tin tài khoản:', data.messages);
-          setAccountDetails(null);
-        }
-      } catch (error) {
-        console.error('Lỗi khi gọi API:', error);
-        setAccountDetails(null);
-      } finally {
+  const fetchAccountDetails = async () => {
+    setLoading(true);
+    try {
+      const storedAccountID = await AsyncStorage.getItem('accountId');
+      if (!storedAccountID) {
+        console.error('Không tìm thấy accountID');
         setLoading(false);
+        return;
       }
-    };
+      setAccountID(storedAccountID);
 
-    fetchAccountDetails();
-  }, []);
+      const response = await fetch(
+        `http://14.225.220.108:2602/account/get-account-by-userId/${storedAccountID}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.isSuccess && data.result) {
+        setAccountDetails(data.result);
+      } else {
+        console.error('Lỗi khi lấy thông tin tài khoản:', data.messages);
+        setAccountDetails(null);
+      }
+    } catch (error) {
+      console.error('Lỗi khi gọi API:', error);
+      setAccountDetails(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAccountDetails();
+    }, [])
+  );
 
   if (loading) {
     return (
@@ -109,7 +113,10 @@ const AccountDetails = ({ navigation }) => {
 
   const navigateToUpdateAccount = () => {
     if (accountID) {
-      navigation.navigate('UpdateAccount', { accountID });
+      navigation.navigate('UpdateAccount', {
+        accountID,
+        onUpdateSuccess: fetchAccountDetails, // Truyền callback để reload dữ liệu
+      });
     }
   };
 
