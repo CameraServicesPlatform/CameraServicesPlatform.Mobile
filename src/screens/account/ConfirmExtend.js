@@ -56,7 +56,7 @@ const ConfirmExtend = ({ route, navigation }) => {
       <Text style={styles.text}>Ngày bắt đầu: {extendData?.startDate}</Text>
       <Text style={styles.text}>Ngày kết thúc: {extendData?.endDate}</Text>
       <Text style={styles.text}>Ngày trả hàng: {extendData?.returnDate}</Text>
-      <Text style={styles.text}>Tổng giá: {extendData?.totalPrice} VNĐ</Text>
+      <Text style={styles.text}>Tổng giá: {extendData?.totalPrice.toLocaleString()} VNĐ</Text>
       <Text style={styles.text}>Đơn vị thời gian: {extendData?.durationUnit}</Text>
       <Text style={styles.text}>Giá trị thời gian: {extendData?.durationValue}</Text>
 

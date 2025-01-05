@@ -120,11 +120,11 @@ const OrderExtend = ({ route, navigation }) => {
 
       // Kiểm tra: nếu đơn vị là 'hour'
       if (unit === 'hour') {
-        // Giờ bắt đầu < 19
-        if (start.getHours() >= 19) {
+        // Giờ bắt đầu < 17
+        if (start.getHours() >= 17) {
           Alert.alert(
             'Không thể gia hạn',
-            'Chỉ gia hạn theo giờ trước 19h (vì cho thuê đến 20h).'
+            'Chỉ gia hạn theo giờ trước 17h'
           );
           setEndDate(null);
           setFinalReturnDate(null);
@@ -248,23 +248,23 @@ const OrderExtend = ({ route, navigation }) => {
             <View style={styles.infoContainer}>
               <Text style={styles.infoText}>
                 <Text style={styles.infoLabel}>Giá cọc: </Text>
-                {serverProduct.depositProduct} vnđ
+                {serverProduct.depositProduct.toLocaleString()} vnđ
               </Text>
               <Text style={styles.infoText}>
                 <Text style={styles.infoLabel}>Thuê theo giờ: </Text>
-                {serverProduct.pricePerHour} vnđ
+                {serverProduct.pricePerHour.toLocaleString()} vnđ
               </Text>
               <Text style={styles.infoText}>
                 <Text style={styles.infoLabel}>Thuê theo ngày: </Text>
-                {serverProduct.pricePerDay} vnđ
+                {serverProduct.pricePerDay.toLocaleString()} vnđ
               </Text>
               <Text style={styles.infoText}>
                 <Text style={styles.infoLabel}>Thuê theo tuần: </Text>
-                {serverProduct.pricePerWeek} vnđ
+                {serverProduct.pricePerWeek.toLocaleString()} vnđ
               </Text>
               <Text style={styles.infoText}>
                 <Text style={styles.infoLabel}>Thuê theo tháng: </Text>
-                {serverProduct.pricePerMonth} vnđ
+                {serverProduct.pricePerMonth.toLocaleString()} vnđ
               </Text>
             </View>
 
