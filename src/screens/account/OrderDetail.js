@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Button, Modal, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const OrderDetail = ({ route }) => {
@@ -7,6 +7,8 @@ const OrderDetail = ({ route }) => {
   const [orderDetail, setOrderDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cancelMessage, setCancelMessage] = useState('');  // New state for cancel message
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const navigation = useNavigation();
 
   const fetchOrderDetail = async () => {
@@ -136,6 +138,36 @@ const OrderDetail = ({ route }) => {
     }
   };
 
+  const handleCancelOrder = async () => {
+    if (!cancelMessage.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập lý do hủy đơn hàng.');
+      return;
+    }
+
+    const body = {
+      orderID,
+      cancelMessage,
+    };
+
+    try {
+      const response = await fetch('http://14.225.220.108:2602/order/cancel-order', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        Alert.alert('Thành công', 'Đơn hàng đã được hủy.');
+        reloadOrderDetails();
+        setIsModalVisible(false);  // Đóng modal
+      } else {
+        throw new Error('Không thể hủy đơn hàng.');
+      }
+    } catch (error) {
+      Alert.alert('Lỗi', 'Không thể hủy đơn hàng.');
+    }
+  };
+
   const handleExtend = () => {
     // Ensure you pass all necessary params to the navigation
     navigation.navigate('OrderExtend', {
@@ -185,28 +217,61 @@ const OrderDetail = ({ route }) => {
       </View>
       <Text style={styles.total}>Tổng cộng: {totalAmount?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "N/A"}</Text>
       <View style={styles.buttonContainer}>
+        {/* Extend rental button */}
         {orderType === 1 && (
           <TouchableOpacity style={[styles.button, styles.buttonPrimary]} onPress={handleExtend}>
             <Text style={styles.buttonText}>Gia hạn đơn thuê</Text>
           </TouchableOpacity>
         )}
+
+        {/* Review button (if order status is 'Completed') */}
         {orderStatus === 2 && (
-          <TouchableOpacity style={[styles.button, styles.buttonDanger]}>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonDanger]}
+            onPress={() => navigation.navigate('RatingProduct', {
+              productID: orderDetails[0]?.productID,
+              accountID: iD,
+            })}
+          >
             <Text style={styles.buttonText}>Đánh giá</Text>
           </TouchableOpacity>
         )}
-         {orderStatus === 2 && (
+
+        {/* Return product button (if order status is 'Shipped' and order type is 'Purchase') */}
+        {orderStatus === 2 && orderType === 0 && (
+          <TouchableOpacity style={[styles.button, styles.buttonReturn]} onPress={handleReturn}>
+            <Text style={styles.buttonText}>Trả hàng</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Cancel order button */}
+        {orderStatus === 0 && (
         <TouchableOpacity
-          style={[styles.button, styles.buttonDanger]}
-          onPress={() => navigation.navigate('RatingProduct', {
-            productID: orderDetails[0]?.productID,
-            accountID: iD,
-          })}
+          style={[styles.button, styles.buttonCancel]}
+          onPress={() => setIsModalVisible(true)}
         >
-          <Text style={styles.buttonText}>Đánh giá</Text>
+          <Text style={styles.buttonText}>Hủy đơn hàng</Text>
         </TouchableOpacity>
-         )}
+                )}
       </View>
+      <Modal visible={isModalVisible} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.title}>Lý do hủy đơn hàng</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={cancelMessage}
+              onChangeText={setCancelMessage}
+              placeholder="Nhập lý do hủy"
+              multiline
+            />
+            <View style={styles.modalButtons}>
+              <Button title="Hủy" onPress={() => setIsModalVisible(false)} />
+              <Button title="Xác nhận" onPress={handleCancelOrder} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -221,15 +286,67 @@ const styles = StyleSheet.create({
   text1: { fontSize: 16, marginBottom: 4, textAlign: "center" },
   subTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 8, textAlign: "center" },
   total: { fontSize: 18, fontWeight: "bold", textAlign: "center", marginVertical: 16 },
-  buttonContainer: { flexDirection: "row", justifyContent: "space-between" },
-  button: { flex: 1, padding: 12, borderRadius: 8, marginBottom: 4, marginHorizontal: 4, alignItems: "center" },
-  buttonPrimary: { backgroundColor: "#007bff" },
-  buttonDanger: { backgroundColor: "#007bff" },
-  buttonText: { color: "#fff", fontWeight: "bold" },
+  buttonContainer: {
+    flexDirection: 'column',
+    marginTop: 20,
+  },
+  button: {
+    marginBottom: 10, // Ensures spacing between buttons
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonPrimary: {
+    backgroundColor: '#007bff',
+  },
+  buttonDanger: {
+    backgroundColor: '#dc3545',
+  },
+  buttonReturn: {
+    backgroundColor: '#28a745',
+  },
+  buttonCancel: {
+    backgroundColor: '#ffc107',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { fontSize: 16, marginTop: 10, color: "#555" },
   errorContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { fontSize: 16, color: "red" },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalInput: {
+    height: 100,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 20,
+    padding: 10,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
 });
 
 export default OrderDetail;
