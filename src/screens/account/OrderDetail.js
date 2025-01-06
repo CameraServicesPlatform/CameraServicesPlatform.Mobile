@@ -195,6 +195,7 @@ const OrderDetail = ({ route }) => {
             <Text style={styles.buttonText}>Đánh giá</Text>
           </TouchableOpacity>
         )}
+         {orderStatus === 2 && (
         <TouchableOpacity
           style={[styles.button, styles.buttonDanger]}
           onPress={() => navigation.navigate('RatingProduct', {
@@ -204,6 +205,7 @@ const OrderDetail = ({ route }) => {
         >
           <Text style={styles.buttonText}>Đánh giá</Text>
         </TouchableOpacity>
+         )}
       </View>
     </ScrollView>
   );
