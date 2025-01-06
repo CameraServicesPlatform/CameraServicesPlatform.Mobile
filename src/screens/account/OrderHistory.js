@@ -7,23 +7,24 @@ import {
   ActivityIndicator,
   Button,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // Thêm thư viện Picker
+import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ORDER_STATUS_DETAILS = {
-  0: { text: "Chờ xử lý", color: "blue", icon: "fa-hourglass-start" },
-  1: { text: "Sản phẩm sẵn sàng được giao", color: "green", icon: "fa-check-circle" },
-  2: { text: "Hoàn thành", color: "yellow", icon: "fa-clipboard-check" },
-  3: { text: "Đã nhận sản phẩm", color: "purple", icon: "fa-shopping-cart" },
-  4: { text: "Đã giao hàng", color: "cyan", icon: "fa-truck" },
-  5: { text: "Thanh toán thất bại", color: "cyan", icon: "fa-money-bill-wave" },
-  6: { text: "Đang hủy", color: "lime", icon: "fa-box-open" },
-  7: { text: "Đã hủy thành công", color: "red", icon: "fa-times-circle" },
-  8: { text: "Đã Thanh toán", color: "orange", icon: "fa-money-bill-wave" },
-  9: { text: "Hoàn tiền đang chờ xử lý", color: "pink", icon: "fa-clock" },
-  10: { text: "Hoàn tiền thành công", color: "brown", icon: "fa-undo" },
-  11: { text: "Hoàn trả tiền đặt cọc", color: "gold", icon: "fa-piggy-bank" },
-  12: { text: "Gia hạn", color: "violet", icon: "fa-calendar-plus" },
+const ORDER_STATUS_MAP = {
+  0: { label: "Đang xử lý", color: "#ff9900" },
+  1: { label: "Đã phê duyệt", color: "#007bff" },
+  2: { label: "Hoàn thành", color: "#28a745" },
+  3: { label: "Đã đặt", color: "#17a2b8" },
+  4: { label: "Đã giao hàng", color: "#6f42c1" },
+  5: { label: "Thanh toán thất bại", color: "#dc3545" },
+  6: { label: "Đang hủy", color: "#ffc107" },
+  7: { label: "Đã hủy", color: "#dc3545" },
+  8: { label: "Đã thanh toán", color: "#20c997" },
+  9: { label: "Đang hoàn tiền", color: "#ff9800" },
+  10: { label: "Đã hoàn tiền", color: "#4caf50" },
+  11: { label: "Trả cọc", color: "#9c27b0" },
+  12: { label: "Gia hạn", color: "#3f51b5" },
+  default: { label: "Không xác định", color: "#555" },
 };
 
 const OrderHistory = ({ navigation }) => {
@@ -45,7 +46,7 @@ const OrderHistory = ({ navigation }) => {
         }
 
         const response = await fetch(
-          `http://14.225.220.108:2602/order/get-order-of-account?AccountID=${accountID}&pageIndex=1&pageSize=10000`
+          `http://14.225.220.108:2602/order/get-order-of-account?AccountID=${accountID}`
         );
 
         if (!response.ok) {
@@ -74,12 +75,14 @@ const OrderHistory = ({ navigation }) => {
   };
 
   const filteredOrders = orders.filter((order) => {
+    // Filter by type
     if (filterType !== 'ALL') {
       const rental = isRentalOrder(order);
       if (filterType === 'RENT' && !rental) return false;
       if (filterType === 'BUY' && rental) return false;
     }
 
+    // Filter by status
     if (filterStatus !== 'ALL') {
       return order.orderStatus.toString() === filterStatus;
     }
@@ -90,43 +93,24 @@ const OrderHistory = ({ navigation }) => {
   const sortedOrders = filteredOrders.sort((a, b) => {
     const dateA = new Date(a.orderDate).getTime();
     const dateB = new Date(b.orderDate).getTime();
-    if (sortType === 'NEWEST') {
-      return dateB - dateA;
-    } else {
-      return dateA - dateB;
-    }
+    return sortType === 'NEWEST' ? dateB - dateA : dateA - dateB;
   });
 
   const renderOrder = ({ item }) => {
-    const statusDetails = ORDER_STATUS_DETAILS[item.orderStatus] || {
-      text: "Không xác định",
-      color: "gray",
-      icon: "fa-question-circle",
-    };
-    const orderType = item.orderType === 0 ? "Mua" : "Thuê";
+    const orderStatus =
+      ORDER_STATUS_MAP[item.orderStatus] || ORDER_STATUS_MAP.default;
+    const orderType = item.orderType === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng';
     const orderDate = new Date(item.orderDate).toLocaleString();
-    const rentalStartDateRaw = item.rentalEndDate;
-    const rentalStartDate = new Date(item.rentalStartDate).toLocaleString(); 
-    const rentalEndDate = new Date(item.rentalEndDate).toLocaleString();
-    const returnDate = new Date(item.returnDate).toLocaleString(); 
-
-    let periodRentalDisplay = null;
-    if (item.orderDetails && item.orderDetails.length > 0) {
-      const detail = item.orderDetails[0];
-      if (detail.periodRental) {
-        periodRentalDisplay = new Date(detail.periodRental).toLocaleString();
-      }
-    }
 
     return (
-      <View style={[styles.orderContainer, { borderLeftColor: statusDetails.color, borderLeftWidth: 4 }]}>
+      <View style={styles.orderContainer}>
         <Text style={styles.text}>
           <Text style={styles.label}>Mã đơn hàng: </Text>
           {item.orderID}
         </Text>
-        <Text style={[styles.text, { color: statusDetails.color }]}>
+        <Text style={styles.text}>
           <Text style={styles.label}>Trạng thái: </Text>
-          {statusDetails.text}
+          <Text style={{ color: orderStatus.color }}>{orderStatus.label}</Text>
         </Text>
         <Text style={styles.text}>
           <Text style={styles.label}>Tổng tiền: </Text>
@@ -140,29 +124,32 @@ const OrderHistory = ({ navigation }) => {
           <Text style={styles.label}>Ngày tạo: </Text>
           {orderDate}
         </Text>
-        {periodRentalDisplay && (
-  <View style={styles.text}>
-    <Text style={styles.label}>Ngày thuê: </Text>
-    <Text>{rentalStartDate}</Text>
-    <Text style={styles.label}>Ngày hết hạn thuê: </Text>
-    <Text>{rentalEndDate}</Text>
-    <Text style={styles.label}>Ngày trả thiết bị: </Text>
-    <Text>{periodRentalDisplay}</Text>
-  </View>
-)}
-
         <Button
           title="Xem chi tiết"
-          onPress={() => {
-            navigation.navigate("OrderDetail", { orderID: item.orderID, ...item, // Truyền toàn bộ thông tin của đơn hàng hiện tại
-              rentalStartDate, // Truyền Ngày thuê (nếu có)
-              rentalStartDateRaw, // Truyền Ngày hết hạn thuê (nếu có)
-              returnDate });
-          }}
+          onPress={() =>
+            navigation.navigate('OrderDetail', { orderID: item.orderID })
+          }
         />
       </View>
     );
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Đang tải dữ liệu đơn hàng...</Text>
+      </View>
+    );
+  }
+
+  // if (!sortedOrders.length) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Text style={styles.errorText}>Không có đơn hàng nào.</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
@@ -188,8 +175,8 @@ const OrderHistory = ({ navigation }) => {
             style={styles.picker}
           >
             <Picker.Item label="Tất cả" value="ALL" />
-            {Object.entries(ORDER_STATUS_DETAILS).map(([key, value]) => (
-              <Picker.Item key={key} label={value.text} value={key} />
+            {Object.entries(ORDER_STATUS_MAP).map(([key, value]) => (
+              <Picker.Item key={key} label={value.label} value={key} />
             ))}
           </Picker>
         </View>
@@ -249,30 +236,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     elevation: 3,
   },
-  list: {
-    paddingBottom: 20,
-  },
-  loadingText: {
-    marginTop: 10,
-    textAlign: 'center',
-    fontSize: 16,
-  },
-  errorText: {
-    textAlign: 'center',
-    fontSize: 18,
-    color: 'red',
-    marginTop: 10,
-  },
   orderContainer: {
     padding: 15,
     marginBottom: 15,
-    borderRadius: 5,
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+    borderRadius: 5,
   },
   text: {
     fontSize: 16,
@@ -280,5 +248,15 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: 'bold',
+  },
+  loadingText: {
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  errorText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 18,
+    color: 'red',
   },
 });

@@ -16,7 +16,17 @@ const ReviewOrder = ({ route, navigation }) => {
   const [productDetails, setProductDetails] = useState(null);
   const [voucherDetails, setVoucherDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'Không có dữ liệu'; // Xử lý khi không có ngày
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+  
   useEffect(() => {
     const fetchDetails = async () => {
       try {
@@ -98,9 +108,9 @@ const ReviewOrder = ({ route, navigation }) => {
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Thông tin thời gian thuê và giao hàng</Text>
-                    <Text style={styles.text}>Ngày bắt đầu thuê: {startDate}</Text>
-                    <Text style={styles.text}>Ngày kết thúc thuê: {endDate}</Text>
-                    <Text style={styles.text}>Ngày trả hàng: {returnDate}</Text>
+                    <Text style={styles.text}>Ngày bắt đầu thuê: {formatDateTime(startDate)}</Text>
+                    <Text style={styles.text}>Ngày kết thúc thuê: {formatDateTime(endDate)}</Text>
+                    <Text style={styles.text}>Ngày trả hàng: {formatDateTime(returnDate)}</Text>
                     <Text style={styles.text}>Tổng giá tiền: {totalPrice.toLocaleString()} vnđ</Text>
                     <Text style={styles.text}>Phương thức giao hàng: {shippingMethod === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng tận nơi'}</Text>
                     {shippingMethod === 1 && <Text style={styles.text}>Địa chỉ giao hàng: {address}</Text>}

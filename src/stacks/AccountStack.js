@@ -9,6 +9,7 @@ import SavedDataScreen from '../screens/account/SavedDataScreen';
 import UpdateAccount from '../screens/account/UpdateAccount';
 import OrderDetail from '../screens/account/OrderDetail';
 import OrderExtend from '../screens/account/OrderExtend';
+import RatingProduct from '../screens/RatingProduct';
 import ConfirmExtend from '../screens/account/ConfirmExtend';
 const Stack = createStackNavigator();
 
@@ -22,8 +23,9 @@ const AccountStack = () => {
       <Stack.Screen name="SavedDataScreen" component={SavedDataScreen} options={{ title: 'Các đơn hàng giao đang giao dịch' }} />
       <Stack.Screen name="Reports" component={Reports} options={{ title: 'Báo cáo' }} />
       <Stack.Screen name="UpdateAccount" component={UpdateAccount} options={{ title: 'Cập nhật thông tin tài khoản' }} />
-      <Stack.Screen name="OrderDetail" component={OrderDetail} options={{ title: 'Thông tin đơn hang' }} />
+      <Stack.Screen name="OrderDetail" component={OrderDetail} options={{ title: 'Thông tin đơn hàng' }} />
       <Stack.Screen name="OrderExtend" component={OrderExtend} options={{ title: 'Gia hạn' }} />
+      <Stack.Screen name="RatingProduct" component={RatingProduct} options={{ title: 'Đánh giá' }}/>
       <Stack.Screen name="ConfirmExtend" component={ConfirmExtend} options={{ title: 'Xác nhận Gia hạn' }} />
     </Stack.Navigator>
   );
