@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
   Modal,
+  Image,
   TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -157,7 +158,14 @@ const Login = ({ navigation, onLoginSuccess }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../images/image.png')}
+          style={styles.logo}
+        />
+      </View>
       <Text style={styles.title}>Đăng nhập</Text>
+
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -172,7 +180,21 @@ const Login = ({ navigation, onLoginSuccess }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Login" onPress={handleLogin} />
+
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.loginButtonText}>Đăng nhập</Text>
+      </TouchableOpacity>
+
+
+      <Text style={styles.registerPrompt}>
+        Nếu chưa có tài khoản?{' '}
+        <Text
+          style={styles.registerLink}
+          onPress={() => navigation.navigate('SignUp')}
+        >
+          Đăng ký tại đây.
+        </Text>
+      </Text>
 
       {/* Modal hỏi có muốn xác thực không */}
       <Modal
@@ -298,6 +320,67 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
+  },
+  logo: {
+    width: 300,
+    height: 150,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  appName: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#777',
+    marginBottom: 20,
+  },
+  forgotPassword: {
+    color: '#007BFF',
+    textAlign: 'right',
+    marginBottom: 20,
+  },
+  loginButton: {
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  orText: {
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#777',
+  },
+  googleButton: {
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  googleIcon: {
+    width: 50,
+    height: 50,
+  },
+  registerPrompt: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#555',
+  },
+  registerLink: {
+    color: '#007BFF',
+    fontWeight: 'bold',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingTop: 10,
   },
 });
 
