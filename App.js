@@ -130,7 +130,7 @@ export default function App() {
             <Drawer.Screen
               name="SignUp"
               component={SignUp}
-              options={{ headerShown: true, title: 'Đăng kí' }}
+              options={{ headerShown: true, title: 'Đăng ký' }}
             />
           </>
         )}

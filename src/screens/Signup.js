@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Modal,
+  Image,
   TouchableOpacity,
 } from 'react-native';
 
@@ -77,6 +78,12 @@ const SignUp = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../images/image.png')}
+          style={styles.logo}
+        />
+      </View>
       <Text style={styles.title}>Đăng ký tài khoản</Text>
       <TextInput
         style={styles.input}
@@ -111,8 +118,18 @@ const SignUp = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Đăng ký" onPress={handleSignUp} />
-
+      <TouchableOpacity style={styles.registerButton} onPress={handleSignUp}>
+              <Text style={styles.registerButtonText}>Đăng kýký</Text>
+            </TouchableOpacity>
+      <Text style={styles.loginPrompt}>
+                    Đã có có tài khoản?{' '}
+                    <Text
+                      style={styles.loginLink}
+                      onPress={() => navigation.navigate('Login')}
+                    >
+                      Đăng nhập.
+                    </Text>
+                  </Text>
       {loading && (
         <ActivityIndicator
           size="large"
@@ -198,6 +215,37 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     marginTop: 20,
+  },
+  loginPrompt: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#555',
+  },
+  loginLink: {
+    color: '#007BFF',
+    fontWeight: 'bold',
+  },
+  registerButton: {
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  registerButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingTop: 10,
+  },
+  logo: {
+    width: 300,
+    height: 150,
+    alignSelf: 'center',
+    marginBottom: 20,
   },
 });
 
