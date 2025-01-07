@@ -206,16 +206,16 @@ const OrderDetail = ({ route }) => {
         <Text style={styles.subTitle}>Thông tin sản phẩm</Text>
         <Text style={styles.text}>Tên sản phẩm: {orderDetails[0]?.productName || "N/A"}</Text>
         <Text style={styles.text}>Mã sản phẩm: {orderDetails[0]?.serialNumber || "N/A"}</Text>
-        <Text style={styles.text}>Giá: {orderDetails[0]?.productPrice?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "N/A"}</Text>
+        <Text style={styles.text}>Giá: {orderDetails[0]?.productPrice?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
         {orderType === 1 && (
           <>
-            <Text style={styles.text}>Tiền cọc: {deposit?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "N/A"}</Text>
-            <Text style={styles.text}>Giữ chỗ: {reservationMoney?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "N/A"}</Text>
+            <Text style={styles.text}>Tiền cọc: {deposit?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
+            <Text style={styles.text}>Giữ chỗ: {reservationMoney?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
           </>
         )}
         <Text style={styles.text}>Giảm giá: {orderDetails[0]?.discount || 0}%</Text>
       </View>
-      <Text style={styles.total}>Tổng cộng: {totalAmount?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "N/A"}</Text>
+      <Text style={styles.total}>Tổng cộng: {totalAmount?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
       <View style={styles.buttonContainer}>
         {/* Extend rental button */}
         {orderType === 1 && (
