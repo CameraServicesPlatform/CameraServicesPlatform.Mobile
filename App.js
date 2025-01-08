@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icon
 
 // Import các màn hình
 import HomeScreen from './src/screens/HomeScreen';
@@ -54,7 +55,6 @@ export default function App() {
     }
   };
 
-  // Tùy chỉnh nội dung Drawer
   const CustomDrawerContent = (props) => (
     <DrawerContentScrollView {...props}>
       <View style={styles.logoContainer}>
@@ -67,15 +67,6 @@ export default function App() {
     </DrawerContentScrollView>
   );
 
-  // Reload logic for screens
-  const reloadHomeData = () => console.log('Reloading Home Data...');
-  const reloadCategoryData = () => console.log('Reloading Category Data...');
-  const reloadRentalData = () => console.log('Reloading Rental Product Data...');
-  const reloadPolicyData = () => console.log('Reloading Policy Data...');
-  const reloadContactData = () => console.log('Reloading Contact Data...');
-  const reloadSettingsData = () => console.log('Reloading Settings Data...');
-  const reloadAccountData = () => console.log('Reloading Account Data...');
-
   return (
     <NavigationContainer>
       <Drawer.Navigator
@@ -84,40 +75,81 @@ export default function App() {
       >
         <Drawer.Screen
           name="Home"
-          component={ReloadableScreen(HomeScreen, reloadHomeData)}
-          options={{ headerShown: true, title: 'Trang chủ' }}
+          component={ReloadableScreen(HomeScreen, () => console.log('Reloading Home Data...'))}
+          options={{
+            headerShown: true,
+            title: 'Trang chủ',
+            drawerIcon: ({ color, size }) => (
+              <Icon name="home" color={color} size={size} />
+            ),
+          }}
         />
         <Drawer.Screen
           name="Category"
-          component={ReloadableScreen(Category, reloadCategoryData)}
-          options={{ headerShown: true, title: 'Danh mục' }}
+          component={ReloadableScreen(Category, () => console.log('Reloading Category Data...'))}
+          options={{
+            headerShown: true,
+            title: 'Danh mục',
+            drawerIcon: ({ color, size }) => (
+              <Icon name="format-list-bulleted" color={color} size={size} />
+            ),
+          }}
         />
         <Drawer.Screen
           name="RentalProduct"
-          component={ReloadableScreen(RentalProduct, reloadRentalData)}
-          options={{ headerShown: true, title: 'Sản phẩm thuê' }}
+          component={ReloadableScreen(RentalProduct, () => console.log('Reloading Rental Product Data...'))}
+          options={{
+            headerShown: true,
+            title: 'Sản phẩm thuê',
+            drawerIcon: ({ color, size }) => (
+              <Icon name="car-rental" color={color} size={size} />
+            ),
+          }}
         />
         <Drawer.Screen
           name="ProductSale"
-          component={ReloadableScreen(ProductSaleStack, reloadRentalData)}
-          options={{ headerShown: true, title: 'Sản phẩm bán' }}
+          component={ReloadableScreen(ProductSaleStack, () => console.log('Reloading Product Sale Data...'))}
+          options={{
+            headerShown: true,
+            title: 'Sản phẩm bán',
+            drawerIcon: ({ color, size }) => (
+              <Icon name="cart" color={color} size={size} />
+            ),
+          }}
         />
         <Drawer.Screen
           name="Policy"
-          component={ReloadableScreen(Policy, reloadPolicyData)}
-          options={{ headerShown: true, title: 'Chính sách' }}
+          component={ReloadableScreen(Policy, () => console.log('Reloading Policy Data...'))}
+          options={{
+            headerShown: true,
+            title: 'Chính sách',
+            drawerIcon: ({ color, size }) => (
+              <Icon name="file-document" color={color} size={size} />
+            ),
+          }}
         />
         <Drawer.Screen
           name="Favorites"
-          component={ReloadableScreen(SettingsScreen, reloadSettingsData)}
-          options={{ headerShown: true, title: 'Yêu thích' }}
+          component={ReloadableScreen(SettingsScreen, () => console.log('Reloading Favorites Data...'))}
+          options={{
+            headerShown: true,
+            title: 'Yêu thích',
+            drawerIcon: ({ color, size }) => (
+              <Icon name="heart" color={color} size={size} />
+            ),
+          }}
         />
         <Drawer.Screen
           name="Contact"
-          component={ReloadableScreen(Contact, reloadContactData)}
-          options={{ headerShown: true, title: 'Liên hệ' }}
+          component={ReloadableScreen(Contact, () => console.log('Reloading Contact Data...'))}
+          options={{
+            headerShown: true,
+            title: 'Liên hệ',
+            drawerIcon: ({ color, size }) => (
+              <Icon name="phone" color={color} size={size} />
+            ),
+          }}
         />
-
         {!isLoggedIn && (
           <>
             <Drawer.Screen
@@ -125,22 +157,39 @@ export default function App() {
               component={(props) => (
                 <Login {...props} onLoginSuccess={checkLoginStatus} />
               )}
-              options={{ headerShown: true, title: 'Đăng nhập' }}
+              options={{
+                headerShown: true,
+                title: 'Đăng nhập',
+                drawerIcon: ({ color, size }) => (
+                  <Icon name="login" color={color} size={size} />
+                ),
+              }}
             />
             <Drawer.Screen
               name="SignUp"
               component={SignUp}
-              options={{ headerShown: true, title: 'Đăng kí' }}
+              options={{
+                headerShown: true,
+                title: 'Đăng ký',
+                drawerIcon: ({ color, size }) => (
+                  <Icon name="account-plus" color={color} size={size} />
+                ),
+              }}
             />
           </>
         )}
-
         {isLoggedIn && (
           <>
             <Drawer.Screen
               name="Tài khoản"
-              component={ReloadableScreen(AccountStack, reloadAccountData)}
-              options={{ headerShown: true }}
+              component={ReloadableScreen(AccountStack, () => console.log('Reloading Account Data...'))}
+              options={{
+                headerShown: true,
+                title: 'Tài khoản',
+                drawerIcon: ({ color, size }) => (
+                  <Icon name="account" color={color} size={size} />
+                ),
+              }}
             />
             <Drawer.Screen
               name="Đăng xuất"
@@ -150,7 +199,13 @@ export default function App() {
                 }, []);
                 return null;
               }}
-              options={{ headerShown: false }}
+              options={{
+                headerShown: false,
+                title: 'Đăng xuất',
+                drawerIcon: ({ color, size }) => (
+                  <Icon name="logout" color={color} size={size} />
+                ),
+              }}
             />
           </>
         )}

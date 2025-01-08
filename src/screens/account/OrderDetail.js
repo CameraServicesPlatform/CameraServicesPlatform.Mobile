@@ -7,7 +7,13 @@ import {
   ActivityIndicator,
   Button,
   Alert,
+  Modal,
+  Image,
+  TouchableOpacity,
 } from 'react-native';
+
+// ======= THAY ĐỔI: Dùng expo-image-picker =======
+import * as ImagePicker from 'expo-image-picker';
 
 const ORDER_STATUS_DETAILS = {
   0: { text: "Chờ xử lý", color: "blue" },
@@ -24,14 +30,30 @@ const ORDER_STATUS_DETAILS = {
   11: { text: "Hoàn trả tiền đặt cọc", color: "gold" },
   12: { text: "Gia hạn", color: "violet" },
 };
+
 const ORDER_TYPE_DETAILS = {
   0: "Mua",
   1: "Thuê",
 };
-const OrderDetail = ({ route, navigation  }) => {
-  const { orderID, rentalStartDate, rentalEndDate, returnDate, orderStatus, orderType, deliveriesMethod, rentalStartDateRaw } = route.params || {};
+
+const OrderDetail = ({ route, navigation }) => {
+  const {
+    orderID,
+    rentalStartDate,
+    rentalEndDate,
+    returnDate,
+    orderStatus,
+    orderType,
+    deliveriesMethod,
+    rentalStartDateRaw,
+  } = route.params || {};
+
   const [orderDetails, setOrderDetails] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // State cho phần Upload ảnh
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -41,6 +63,7 @@ const OrderDetail = ({ route, navigation  }) => {
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
+
         }
         const data = await response.json();
         if (data.isSuccess && data.result) {
@@ -83,6 +106,99 @@ const OrderDetail = ({ route, navigation  }) => {
     }
   };
 
+  // ====== HÀM CHỌN ẢNH BẰNG expo-image-picker ======
+  const pickImage = async () => {
+    try {
+      // Hỏi quyền truy cập ảnh nếu chưa có
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Thông báo', 'Bạn cần cho phép truy cập thư viện ảnh!');
+        return;
+      }
+
+      // Mở thư viện ảnh
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      // Kiểm tra user có hủy chọn ảnh hay không
+      if (!result.canceled && result.assets?.length > 0) {
+        setSelectedImage(result.assets[0]); // Lấy asset đầu tiên
+      }
+    } catch (error) {
+      console.error('Lỗi pickImage:', error);
+    }
+  };
+
+  // ====== HÀM XÁC NHẬN TRẢ HÀNG (GỬI ẢNH LÊN SERVER) ======
+  const handleConfirmReturn = async () => {
+    // Kiểm tra đã chọn ảnh chưa
+    if (!selectedImage) {
+      Alert.alert('Thông báo', 'Vui lòng chọn ảnh để tiếp tục!');
+      return;
+    }
+
+    try {
+      // Tạo form data
+      const formData = new FormData();
+      // orderID dạng text
+      formData.append('orderID', orderID.toString());
+
+      // Append file
+      formData.append('image', {
+        uri: selectedImage.uri,
+        name: 'product_image.jpg', // Hoặc tuỳ ý
+        type: 'image/jpeg',
+      });
+
+      // Gửi request 1: upload ảnh
+      const response = await fetch(
+        'http://14.225.220.108:2602/order/add-img-product-after',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          body: formData,
+        }
+      );
+
+      if (response.ok) {
+        // Request 1 thành công -> Gửi request 2 (cập nhật trạng thái)
+        const updateUrl = `http://14.225.220.108:2602/order/update-order-status-pending-refund/${orderID}`;
+        const response2 = await fetch(updateUrl, {
+          method: 'PUT',
+        });
+
+        if (response2.ok) {
+          // Thành công cả 2
+          Alert.alert(
+            'Thành công',
+            'Đã gửi ảnh sản phẩm trả hàng và cập nhật trạng thái hoàn tiền!'
+          );
+          setModalVisible(false);
+          setSelectedImage(null);
+          reloadOrderDetails();
+        } else {
+          throw new Error('Không thể cập nhật trạng thái hoàn tiền.');
+        }
+      } else {
+        throw new Error('Không thể gửi ảnh trả hàng.');
+      }
+    } catch (error) {
+      console.error('Lỗi:', error);
+      Alert.alert('Lỗi', error.message || 'Có lỗi xảy ra.');
+    }
+  };
+
+
+  // Khi nhấn nút "Trả hàng"
+  const handleReturn = () => {
+    setModalVisible(true);
+  };
+
   // Render từng chi tiết đơn hàng
   const renderOrderDetailItem = ({ item }) => {
     const {
@@ -92,20 +208,18 @@ const OrderDetail = ({ route, navigation  }) => {
       discount,
       periodRental,
       productQuality,
-      product // Bên trong có productDescription, depositProduct...
+      product,
     } = item;
-  
-    // Ép kiểu periodRental nếu có
-    let periodRentalDisplay = null;
-    if (periodRental) {
-      periodRentalDisplay = new Date(periodRental).toLocaleString();
-    }
 
+    // Nút "Đến nhận"
     const handlePickup = async () => {
       try {
-        const response = await fetch(`http://14.225.220.108:2602/order/update-order-status-placed/${orderID}`, {
-          method: 'PUT',
-        });
+        const response = await fetch(
+          `http://14.225.220.108:2602/order/update-order-status-placed/${orderID}`,
+          {
+            method: 'PUT',
+          }
+        );
         if (response.ok) {
           Alert.alert('Thành công', 'Trạng thái đã được cập nhật thành công.');
           reloadOrderDetails();
@@ -118,38 +232,9 @@ const OrderDetail = ({ route, navigation  }) => {
       }
     };
 
-    const handleReturn = async () => {
-      const returnDate = new Date().toISOString();
-      const body = {
-        orderID,
-        returnDate,
-        condition: "",
-      };
-
-      try {
-        const response = await fetch('http://14.225.220.108:2602/returnDetail/create-return-for-member', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
-        if (response.ok) {
-          Alert.alert('Thành công', 'Đã tạo yêu cầu trả hàng thành công.');
-          reloadOrderDetails();
-        } else {
-          throw new Error('Tạo yêu cầu trả hàng thất bại.');
-        }
-      } catch (error) {
-        console.error('Lỗi:', error);
-        Alert.alert('Lỗi', 'Không thể tạo yêu cầu trả hàng.');
-      }
-    };
-
+    // Nút "Gia hạn"
     const handleExtend = () => {
-      // Điều hướng sang trang OrderExtend
       navigation.navigate('OrderExtend', {
-        // Truyền các tham số (params) cần thiết
         orderID,
         rentalStartDate,
         rentalEndDate,
@@ -158,47 +243,39 @@ const OrderDetail = ({ route, navigation  }) => {
         orderType,
         deliveriesMethod,
         product,
-        rentalStartDateRaw
+        rentalStartDateRaw,
       });
     };
 
     return (
       <View style={styles.detailContainer}>
-        {/* Tên sản phẩm */}
         <Text style={styles.productName}>{productName}</Text>
-
-        {/* Mô tả sản phẩm (nếu có) */}
         {product?.productDescription ? (
           <Text style={styles.description}>{product.productDescription}</Text>
         ) : null}
 
-        {/* Hiển thị chất lượng sản phẩm */}
         <Text style={styles.infoText}>
           <Text style={styles.label}>Chất lượng: </Text>
           {productQuality || 'N/A'}
         </Text>
 
-        {/* Deposit (tiền cọc) nếu có */}
-        {product?.depositProduct ? (
+        {orderType === 1 && rentalStartDate && (
           <Text style={styles.infoText}>
             <Text style={styles.label}>Giá cọc: </Text>
             {product.depositProduct.toLocaleString()} VND
           </Text>
-        ) : null}
-
-        {/* Giá của từng sản phẩm */}
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Giá thuê/mua: </Text>
-          {productPrice?.toLocaleString()} VND
-        </Text>
-
-        {/* Tổng tiền sản phẩm (sau khi nhân số lượng, discount, v.v...) */}
+        )}
+        {orderType === 0 && rentalStartDate && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Giá mua: </Text>
+            {productPrice?.toLocaleString()} VND
+          </Text>
+        )}
         <Text style={styles.infoText}>
           <Text style={styles.label}>Thành tiền: </Text>
           {productPriceTotal?.toLocaleString()} VND
         </Text>
 
-        {/* Discount (nếu có) */}
         {!!discount && discount > 0 && (
           <Text style={styles.infoText}>
             <Text style={styles.label}>Giảm giá: </Text>
@@ -207,50 +284,57 @@ const OrderDetail = ({ route, navigation  }) => {
         )}
 
         {orderStatus !== undefined && (
-          <Text style={[styles.statusText, { color: ORDER_STATUS_DETAILS[orderStatus]?.color }]}
+          <Text
+            style={[
+              styles.statusText,
+              { color: ORDER_STATUS_DETAILS[orderStatus]?.color },
+            ]}
           >
             <Text style={styles.label}>Trạng thái đơn hàng: </Text>
-            {ORDER_STATUS_DETAILS[orderStatus]?.text || "Không xác định"}
+            {ORDER_STATUS_DETAILS[orderStatus]?.text || 'Không xác định'}
           </Text>
         )}
+
         {orderType !== undefined && (
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Loại đơn hàng: </Text>
-          {ORDER_TYPE_DETAILS[orderType] || "Không xác định"}
-        </Text>
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Loại đơn hàng: </Text>
+            {ORDER_TYPE_DETAILS[orderType] || 'Không xác định'}
+          </Text>
         )}
 
-        {/* Ngày thuê (nếu có) */}
-        {rentalStartDate && (
+        {orderType === 1 && rentalStartDate && (
           <Text style={styles.infoText}>
             <Text style={styles.label}>Ngày thuê: </Text>
             {rentalStartDate}
           </Text>
         )}
 
-        {/* Ngày hết hạn thuê (nếu có) */}
-        {rentalEndDate && (
+        {orderType === 1 && rentalEndDate && (
           <Text style={styles.infoText}>
             <Text style={styles.label}>Ngày hết hạn thuê: </Text>
             {rentalEndDate}
           </Text>
         )}
 
-        {/* Ngày trả thiết bị (nếu có) */}
-        {returnDate && (
+        {orderType === 1 && returnDate && (
           <Text style={styles.infoText}>
             <Text style={styles.label}>Ngày trả thiết bị: </Text>
             {returnDate}
           </Text>
         )}
 
-        {/* Thêm nút chức năng */}
+
+        {/* Nút "Đến nhận" */}
         {orderStatus === 1 && deliveriesMethod === 0 && (
           <Button title="Đến nhận" onPress={handlePickup} />
         )}
+
+        {/* Nút "Trả hàng" => mở Modal */}
         {orderStatus === 3 && orderType === 0 && (
           <Button title="Trả hàng" onPress={handleReturn} />
         )}
+
+        {/* Nút "Gia hạn" */}
         {orderStatus === 3 && orderType === 1 && (
           <Button title="Gia hạn" onPress={handleExtend} />
         )}
@@ -284,6 +368,52 @@ const OrderDetail = ({ route, navigation  }) => {
         renderItem={renderOrderDetailItem}
         contentContainerStyle={styles.listContainer}
       />
+
+      {/* MODAL HIỂN THỊ KHI TRẢ HÀNG */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Tạo yêu cầu trả hàng</Text>
+
+            {/* Nút chọn ảnh */}
+            <Button title="Chọn ảnh" onPress={pickImage} />
+
+            {/* Hiển thị ảnh đã chọn (nếu có) */}
+            {selectedImage && (
+              <Image
+                source={{ uri: selectedImage.uri }}
+                style={styles.previewImage}
+              />
+            )}
+
+            {/* Hai nút Hủy / Trả */}
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: 'gray' }]}
+                onPress={() => {
+                  setModalVisible(false);
+                  setSelectedImage(null);
+                }}
+              >
+                <Text style={styles.modalButtonText}>Hủy</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: 'tomato' }]}
+                onPress={handleConfirmReturn}
+              >
+                <Text style={styles.modalButtonText}>Trả</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      {/* KẾT THÚC MODAL */}
     </View>
   );
 };
@@ -352,5 +482,51 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: 'bold',
     color: '#000',
+  },
+  statusText: {
+    fontSize: 15,
+    marginBottom: 6,
+  },
+  // ===== STYLES CHO MODAL =====
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 20,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#333',
+  },
+  previewImage: {
+    width: 100,
+    height: 100,
+    marginVertical: 10,
+    alignSelf: 'center',
+    borderRadius: 6,
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 15,
+  },
+  modalButton: {
+    borderRadius: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });

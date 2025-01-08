@@ -26,7 +26,7 @@ const OrderProductRental = ({ route, navigation }) => {
   const [startDate, setStartDate] = useState(() => {
     const now = new Date();
     const currentHour = now.getHours();
-  
+
     if (currentHour < 8 || currentHour > 20) {
       // Nếu trước 8h sáng hoặc sau 20h tối, thiết lập 8h sáng ngày hôm sau
       const nextDay = new Date(now);
@@ -34,10 +34,10 @@ const OrderProductRental = ({ route, navigation }) => {
       nextDay.setHours(8, 0, 0, 0); // Đặt giờ là 8:00:00 sáng
       return nextDay;
     }
-  
+
     return now; // Nếu trong khoảng 8h - 20h, dùng thời gian hiện tại
   });
-  
+
   const [endDate, setEndDate] = useState(null);
   const [returnDate, setReturnDate] = useState(null);
 
@@ -117,11 +117,15 @@ const OrderProductRental = ({ route, navigation }) => {
           // Cộng giờ theo giá trị nhập
           end.setHours(start.getHours() + parseInt(value));
 
-          // **Kiểm tra giờ bắt đầu & giờ kết thúc (7h - 18h)**
-          if (start.getHours() < 8 || end.getHours() > 20) {
+          // Lấy tổng số phút bắt đầu và kết thúc
+          const startMinutes = start.getHours() * 60 + start.getMinutes();
+          const endMinutes = end.getHours() * 60 + end.getMinutes();
+
+          // Giới hạn thời gian từ 8:00 (480 phút) đến 20:00 (1200 phút)
+          if (startMinutes < 480 || endMinutes > 1200) {
             Alert.alert(
               'Lỗi',
-              'Chỉ cho thuê giờ trong khoảng từ 8h đến 20h. Vui lòng chọn lại thời gian!'
+              'Thời gian thuê vượt quá khung giờ cho phép từ 8:00 đến 20:00. Vui lòng chọn lại thời gian!'
             );
             // Reset
             setEndDate(null);
@@ -129,7 +133,24 @@ const OrderProductRental = ({ route, navigation }) => {
             setTotalPrice(0);
             return;
           }
+
+          // Kiểm tra chi tiết từng giờ trong khoảng từ start đến end
+          for (let i = 0; i < value; i++) {
+            const currentHour = start.getHours() + i;
+            if (currentHour < 8 || currentHour >= 20) {
+              Alert.alert(
+                'Lỗi',
+                'Thời gian thuê bao gồm giờ vượt ngoài khung từ 8:00 đến 20:00. Vui lòng chọn lại thời gian!'
+              );
+              // Reset
+              setEndDate(null);
+              setReturnDate(null);
+              setTotalPrice(0);
+              return;
+            }
+          }
           break;
+
 
         case 'day':
           if (value > 3) {
@@ -260,7 +281,7 @@ const OrderProductRental = ({ route, navigation }) => {
               placeholder="Nhập số giờ/ngày/tuần/tháng..."
             />
 
-            
+
 
             {/* Date picker */}
             {showDatePicker && (

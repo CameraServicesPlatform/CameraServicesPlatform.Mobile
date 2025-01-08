@@ -49,7 +49,9 @@ const ProductCard = ({ item, isFavorite, onToggleFavorite }) => {
         <Text style={styles.productText}>
           Ngày sản xuất: {item.dateOfManufacture ? formatDateTime(item.dateOfManufacture) : 'Không có'}
         </Text>
-
+        <Text style={styles.productText}>
+            Loại hàng: {item.quality}
+          </Text>
 
         {item.priceBuy ? (
           // Hiển thị giá mua nếu priceBuy khác null

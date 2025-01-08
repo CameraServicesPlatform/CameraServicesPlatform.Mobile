@@ -5,6 +5,8 @@ const OrderProductSale = ({ route, navigation }) => {
   const { productID } = route.params || {};
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [quantityToBuy, setQuantityToBuy] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   // Gọi API để lấy chi tiết sản phẩm
   useEffect(() => {
@@ -17,6 +19,7 @@ const OrderProductSale = ({ route, navigation }) => {
 
         if (data.isSuccess) {
           setProduct(data.result);
+          setTotalPrice(data.result.priceBuy || 0);
         } else {
           Alert.alert('Lỗi', 'Không thể lấy thông tin sản phẩm.');
         }
@@ -32,6 +35,27 @@ const OrderProductSale = ({ route, navigation }) => {
       fetchProductDetails();
     }
   }, [productID]);
+
+  // Cập nhật totalPrice khi quantityToBuy hoặc product thay đổi
+  useEffect(() => {
+    if (product && product.priceBuy) {
+      setTotalPrice(quantityToBuy * product.priceBuy);
+    }
+  }, [quantityToBuy, product]);
+
+  const handleIncreaseQuantity = () => {
+    if (quantityToBuy < product.quantity) {
+      setQuantityToBuy(quantityToBuy + 1);
+    } else {
+      Alert.alert('Thông báo', 'Không đủ số lượng sản phẩm trong kho.');
+    }
+  };
+
+  const handleDecreaseQuantity = () => {
+    if (quantityToBuy > 1) {
+      setQuantityToBuy(quantityToBuy - 1);
+    }
+  };
 
   if (loading) {
     return (
@@ -57,14 +81,42 @@ const OrderProductSale = ({ route, navigation }) => {
           )}
           <View style={styles.infoContainer}>
             <Text style={styles.title}>{product.productName}</Text>
-            <Text style={styles.text}>Giá mua: {product.priceBuy ? `${product.priceBuy} vnđ` : 'Không có giá mua'}</Text>
-            <Text style={styles.text}>Chất lượng: {product.quality}</Text>
-            <Text style={styles.text}>Mô tả: {product.productDescription || 'Không có mô tả'}</Text>
+            {product.quantity > 0 ? (
+              <>
+                <Text style={styles.text}>Giá mua: {product.priceBuy ? `${product.priceBuy} vnđ` : 'Không có giá mua'}</Text>
+                <Text style={styles.text}>Chất lượng: {product.quality}</Text>
+                <Text style={styles.text}>Số lượng còn lại: {product.quantity}</Text>
+                <Text style={styles.text}>Mô tả: {product.productDescription || 'Không có mô tả'}</Text>
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity style={styles.quantityButton} onPress={handleDecreaseQuantity}>
+                    <Text style={styles.quantityButtonText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.quantityText}>{quantityToBuy}</Text>
+                  <TouchableOpacity style={styles.quantityButton} onPress={handleIncreaseQuantity}>
+                    <Text style={styles.quantityButtonText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.text}>Tổng giá: {totalPrice.toLocaleString()} vnđ</Text>
+              </>
+            ) : (
+              <Text style={styles.errorText}>Đã hết hàng</Text>
+            )}
           </View>
 
-          <TouchableOpacity style={styles.nextButton} onPress={() => navigation.navigate('ShippingMethod', { productID })}>
-            <Text style={styles.nextButtonText}>Tiếp theo</Text>
-          </TouchableOpacity>
+          {product.quantity > 0 && (
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={() =>
+                navigation.navigate('ShippingMethod', {
+                  productID,
+                  quantityToBuy,
+                  totalPrice,
+                })
+              }
+            >
+              <Text style={styles.nextButtonText}>Tiếp theo</Text>
+            </TouchableOpacity>
+          )}
         </>
       ) : (
         <Text style={styles.errorText}>Không tìm thấy thông tin sản phẩm.</Text>
@@ -121,6 +173,28 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     margin: 20,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  quantityButton: {
+    padding: 10,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+    marginHorizontal: 10,
+  },
+  quantityButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  quantityText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
   },
   nextButton: {
     backgroundColor: '#007BFF',

@@ -157,7 +157,7 @@ const OrderConfirmation = ({ route }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Xác nhận Đơn hàng</Text>
       <Text style={styles.text}>Mã sản phẩm: {productID}</Text>
-      <Text style={styles.text}>Phương thức giao hàng: {deliveryMethod === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng tận nơi'}</Text>
+      <Text style={styles.text}>Phương thức giao hàng: {deliveryMethod === 0 ? 'Giao hàng tận nơi' : 'Nhận tại cửa hàng'}</Text>
       {deliveryMethod === 1 && (
         <Text style={styles.text}>Địa chỉ giao hàng: {shippingAddress}</Text>
       )}

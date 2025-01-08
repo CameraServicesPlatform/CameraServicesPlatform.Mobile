@@ -8,7 +8,7 @@ const ShippingMethod = ({ route, navigation }) => {
     // Chuyển tiếp sang màn hình Voucher, mặc định shippingMethod = 0 (Nhận tại cửa hàng)
     navigation.navigate('Voucher', {
       productID,
-      shippingMethod: 0,
+      shippingMethod: 1,
       address: '', // không cần nhập địa chỉ
       startDate: route.params.startDate,
       endDate: route.params.endDate,

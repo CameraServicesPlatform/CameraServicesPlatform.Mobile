@@ -130,7 +130,7 @@ const OrderHistory = ({ navigation }) => {
         </Text>
         <Text style={styles.text}>
           <Text style={styles.label}>Tổng tiền: </Text>
-          {item.totalAmount} VND
+          {item.totalAmount.toLocaleString()} VND
         </Text>
         <Text style={styles.text}>
           <Text style={styles.label}>Loại đơn hàng: </Text>

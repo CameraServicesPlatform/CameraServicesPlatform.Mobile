@@ -11,7 +11,7 @@ const Stack = createStackNavigator();
 const ProductSaleStack = () => {
   return (
     <Stack.Navigator initialRouteName="SaleProduct">
-      <Stack.Screen name="SaleProduct" component={SaleProduct} options={{ headerShown: true }} />
+      <Stack.Screen name="SaleProduct" component={SaleProduct} options={{ headerShown: false }} />
       <Stack.Screen name="OrderProductSale" component={OrderProductSale} options={{ headerShown: true }} />
       <Stack.Screen name="ShippingMethod" component={ShippingMethod} options={{ headerShown: true }} />
       <Stack.Screen name="Voucher" component={Voucher} options={{ headerShown: true }} />

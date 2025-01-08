@@ -4,21 +4,21 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Hàm chuyển định dạng chuỗi ISO (VD: "2024-12-17T14:44:13.9407487") sang chuỗi "HH:mm DD/MM/YYYY"
 const formatDateTime = (isoString) => {
-  if (!isoString) return 'Không có';
+    if (!isoString) return 'Không có';
 
-  const dateObj = new Date(isoString);
+    const dateObj = new Date(isoString);
 
-  // Lấy ngày/tháng/năm
-  const day = dateObj.getDate().toString().padStart(2, '0');
-  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-  const year = dateObj.getFullYear().toString();
+    // Lấy ngày/tháng/năm
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const year = dateObj.getFullYear().toString();
 
-  // Lấy giờ/phút
-  const hours = dateObj.getHours().toString().padStart(2, '0');
-  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+    // Lấy giờ/phút
+    const hours = dateObj.getHours().toString().padStart(2, '0');
+    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
 
-  // Format lại
-  return `${hours}:${minutes} ${day}/${month}/${year}`;
+    // Format lại
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
 };
 
 const SaleProductCard = ({ item, isFavorite, onToggleFavorite }) => {
@@ -43,17 +43,14 @@ const SaleProductCard = ({ item, isFavorite, onToggleFavorite }) => {
             <View style={styles.productDetails}>
                 <Text style={styles.productName}>{item.productName}</Text>
 
-                {/* Nếu sản phẩm sale có dateOfManufacture, ta hiển thị tương tự */}
                 <Text style={styles.productText}>
-                  Ngày sản xuất: {item.dateOfManufacture ? formatDateTime(item.dateOfManufacture) : 'Không có'}
+                    Giá mua: {item.priceBuy ? `${item.priceBuy.toLocaleString()} vnđ` : 'Không có'}
                 </Text>
-
                 <Text style={styles.productText}>
-                  Giá mua: {item.priceBuy ? `${item.priceBuy.toLocaleString()} vnđ` : 'Không có'}
+                    Loại hàng: {item.quality}
                 </Text>
-
                 <Text style={styles.productText}>
-                  Đánh giá: {item.rating || 0} ⭐
+                    Đánh giá: {item.rating || 0} ⭐
                 </Text>
             </View>
         </View>

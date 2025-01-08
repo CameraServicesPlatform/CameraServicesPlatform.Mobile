@@ -2,7 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, Image, TouchableOpacity, ScrollView } from 'react-native';
 
 const ReviewOrder = ({ route, navigation }) => {
-  const { productID, shippingMethod, address, voucherID, startDate, endDate, returnDate, totalPrice, durationUnit, durationValue, supplierID } = route.params || {};
+  const { 
+    productID, 
+    shippingMethod, 
+    address, 
+    voucherID, 
+    startDate, 
+    endDate, 
+    returnDate, 
+    totalPrice, 
+    durationUnit, 
+    durationValue, 
+    supplierID, 
+    quantityToBuy // Nhận thêm quantityToBuy
+  } = route.params || {};
 
   const [productDetails, setProductDetails] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +59,8 @@ const ReviewOrder = ({ route, navigation }) => {
       returnDate,
       totalPrice,
       durationUnit,
-      durationValue
+      durationValue,
+      quantityToBuy // Chuyển quantityToBuy
     });
   };
 
@@ -91,7 +105,7 @@ const ReviewOrder = ({ route, navigation }) => {
         </Text>
         <Text style={styles.itemText}>
           <Text style={styles.label}>Giá: </Text>
-          {priceBuy ? `${priceBuy} vnđ` : 'Không có giá mua'}
+          {priceBuy ? `${priceBuy.toLocaleString()} vnđ` : 'Không có giá mua'}
         </Text>
         <Text style={styles.itemText}>
           <Text style={styles.label}>Chất lượng: </Text>
@@ -114,6 +128,14 @@ const ReviewOrder = ({ route, navigation }) => {
         <Text style={styles.itemText}>
           <Text style={styles.label}>Voucher: </Text>
           {voucherID ? voucherID : 'Không có'}
+        </Text>
+        <Text style={styles.itemText}>
+          <Text style={styles.label}>Số lượng mua: </Text>
+          {quantityToBuy}
+        </Text>
+        <Text style={styles.itemText}>
+          <Text style={styles.label}>Tổng giá trị: </Text>
+          {totalPrice.toLocaleString()} vnđ
         </Text>
       </View>
 

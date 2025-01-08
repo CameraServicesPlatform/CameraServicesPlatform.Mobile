@@ -51,7 +51,23 @@ const ReviewOrder = ({ route, navigation }) => {
 
     fetchDetails();
   }, [productID, voucherID]);
+  const formatDateTime = (isoString) => {
+    if (!isoString) return 'Không có';
 
+    const dateObj = new Date(isoString);
+
+    // Lấy ngày/tháng/năm
+    const day = dateObj.getDate().toString().padStart(2, '0');       // Thêm '0' nếu chỉ có 1 chữ số
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const year = dateObj.getFullYear().toString();
+
+    // Lấy giờ/phút
+    const hours = dateObj.getHours().toString().padStart(2, '0');    // Thêm '0' nếu chỉ có 1 chữ số
+    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+
+    // Format lại theo "HH:mm DD/MM/YYYY"
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
+  };
   const handleNext = () => {
     navigation.navigate('OrderConfirmation', {
       productID,
@@ -98,9 +114,9 @@ const ReviewOrder = ({ route, navigation }) => {
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Thông tin thời gian thuê và giao hàng</Text>
-                    <Text style={styles.text}>Ngày bắt đầu thuê: {startDate}</Text>
-                    <Text style={styles.text}>Ngày kết thúc thuê: {endDate}</Text>
-                    <Text style={styles.text}>Ngày trả hàng: {returnDate}</Text>
+                    <Text style={styles.text}>Ngày bắt đầu thuê: {formatDateTime(startDate)}</Text>
+                    <Text style={styles.text}>Ngày kết thúc thuê: {formatDateTime(endDate)}</Text>
+                    <Text style={styles.text}>Ngày trả hàng: {formatDateTime(returnDate)}</Text>
                     <Text style={styles.text}>Tổng giá tiền: {totalPrice.toLocaleString()} vnđ</Text>
                     <Text style={styles.text}>Phương thức giao hàng: {shippingMethod === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng tận nơi'}</Text>
                     {shippingMethod === 1 && <Text style={styles.text}>Địa chỉ giao hàng: {address}</Text>}

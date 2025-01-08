@@ -179,13 +179,14 @@ const styles = StyleSheet.create({
   closeText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#ff0000',
+    color: '#afaaa8',
   },
   productImage: {
     width: '100%',
     height: 200,
     borderRadius: 10,
     marginBottom: 20,
+    marginTop: 20
   },
   productName: {
     fontSize: 20,

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 
 const ShippingMethod = ({ route, navigation }) => {
-  const { productID } = route.params || {};
+  const { productID, quantityToBuy, totalPrice } = route.params || {}; // Nhận thêm quantityToBuy và totalPrice
   const [shippingMethod, setShippingMethod] = useState(null); // 0: Nhận tại cửa hàng, 1: Giao hàng tận nơi
   const [address, setAddress] = useState(''); // Địa chỉ giao hàng
   const [error, setError] = useState(''); // Thông báo lỗi
@@ -24,7 +24,8 @@ const ShippingMethod = ({ route, navigation }) => {
       productID,
       shippingMethod,
       address: shippingMethod === 1 ? address.trim() : '',
-      
+      quantityToBuy, // Chuyển tiếp quantityToBuy
+      totalPrice, // Chuyển tiếp totalPrice
     });
   };
 
@@ -35,11 +36,16 @@ const ShippingMethod = ({ route, navigation }) => {
       {/* Hiển thị thông báo lỗi */}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
+      {/* Hiển thị thông tin sản phẩm */}
+      <Text style={styles.text}>Sản phẩm ID: {productID}</Text>
+      <Text style={styles.text}>Số lượng mua: {quantityToBuy}</Text>
+      <Text style={styles.text}>Tổng giá: {totalPrice.toLocaleString()} vnđ</Text>
+
       {/* Chọn phương thức giao hàng */}
       <View style={styles.optionsContainer}>
         <Button
           title="Nhận tại cửa hàng"
-          color={shippingMethod === 0 ? 'green' : 'gray'}
+          color={shippingMethod === 1 ? 'green' : 'gray'}
           onPress={() => {
             setShippingMethod(0);
             setAddress(''); // Reset địa chỉ nếu chọn nhận tại cửa hàng
@@ -47,13 +53,13 @@ const ShippingMethod = ({ route, navigation }) => {
         />
         <Button
           title="Giao hàng tận nơi"
-          color={shippingMethod === 1 ? 'green' : 'gray'}
+          color={shippingMethod === 0 ? 'green' : 'gray'}
           onPress={() => setShippingMethod(1)}
         />
       </View>
 
       {/* Nhập địa chỉ giao hàng */}
-      {shippingMethod === 1 && (
+      {shippingMethod === 0 && (
         <TextInput
           style={styles.input}
           placeholder="Nhập địa chỉ giao hàng..."
@@ -80,6 +86,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  text: {
+    fontSize: 16,
+    marginBottom: 10,
   },
   optionsContainer: {
     flexDirection: 'row',

@@ -43,13 +43,6 @@ const RentalProductCard = ({ item, isFavorite, onToggleFavorite }) => {
       {/* Thông tin sản phẩm */}
       <View style={styles.productDetails}>
         <Text style={styles.productName}>{item.productName}</Text>
-        
-        {/* Sử dụng formatDateTime để hiển thị ngày sản xuất */}
-        <Text style={styles.productText}>
-          Ngày sản xuất:{' '}
-          {item.dateOfManufacture ? formatDateTime(item.dateOfManufacture) : 'Không có'}
-        </Text>
-
         <Text style={styles.productText}>
           Giá thuê giờ: {item.pricePerHour?.toLocaleString() || 'Không có'} vnđ
         </Text>
@@ -62,6 +55,9 @@ const RentalProductCard = ({ item, isFavorite, onToggleFavorite }) => {
         <Text style={styles.productText}>
           Giá thuê tháng: {item.pricePerMonth?.toLocaleString() || 'Không có'} vnđ
         </Text>
+        <Text style={styles.productText}>
+                    Loại hàng: {item.quality}
+                  </Text>
         <Text style={styles.productText}>
           Đánh giá: {item.rating || 0} ⭐
         </Text>

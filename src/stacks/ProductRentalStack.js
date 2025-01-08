@@ -11,7 +11,7 @@ const Stack = createStackNavigator();
 const ProductReantalStack = () => {
   return (
     <Stack.Navigator initialRouteName="ReantalProduct">
-      <Stack.Screen name="ReantalProduct" component={ReantalProduct} options={{ headerShown: true }} />
+      <Stack.Screen name="ReantalProduct" component={ReantalProduct} options={{ headerShown: false }} />
       <Stack.Screen name="OrderProductRental" component={OrderProductRental} options={{ headerShown: true }} />
       <Stack.Screen name="ShippingMethod" component={ShippingMethod} options={{ headerShown: true }} />
       <Stack.Screen name="Voucher" component={Voucher} options={{ headerShown: true }} />

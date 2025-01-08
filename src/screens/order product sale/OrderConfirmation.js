@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Button, Alert, ActivityIndicator, TouchableOpac
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Linking } from 'react-native';
 
-const OrderConfirmation = ({ route }) => {
+const OrderConfirmation = ({ route, navigation }) => {
   const { 
     productID, 
     voucherID, 
@@ -14,7 +14,8 @@ const OrderConfirmation = ({ route }) => {
     returnDate, 
     totalPrice, 
     durationUnit, 
-    durationValue 
+    durationValue, 
+    quantityToBuy // Nhận thêm quantityToBuy
   } = route.params || {};
 
   const [loading, setLoading] = useState(false);
@@ -88,6 +89,7 @@ const OrderConfirmation = ({ route }) => {
       orderType: 0, // Đặt hàng mua
       shippingAddress: shippingAddress || '',
       deliveryMethod: deliveryMethod,
+      orderQuantity: quantityToBuy,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -178,7 +180,7 @@ const OrderConfirmation = ({ route }) => {
       <Button title="Hoàn tất Đặt hàng" onPress={handleCompleteOrder} />
       {apiResponse && (
         <TouchableOpacity style={styles.paymentButton} onPress={handlePayment}>
-          <Text style={styles.paymentButtonText}>Thanh toán</Text>
+          <Text style={styles.paymentButtonText} >Thanh toán</Text>
         </TouchableOpacity>
       )}
     </View>

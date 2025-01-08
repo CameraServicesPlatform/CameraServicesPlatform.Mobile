@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   closeText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#ff0000',
+    color: '#afaaa8',
   },
   title: {
     fontSize: 22,

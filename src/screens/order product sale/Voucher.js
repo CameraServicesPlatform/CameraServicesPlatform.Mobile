@@ -12,7 +12,8 @@ const Voucher = ({ route, navigation }) => {
     totalPrice,
     durationUnit,
     durationValue,
-    supplierID
+    supplierID,
+    quantityToBuy // Nhận thêm quantityToBuy
   } = route.params || {};
 
   const [vouchers, setVouchers] = useState([]); // Danh sách voucher
@@ -78,6 +79,7 @@ const Voucher = ({ route, navigation }) => {
       durationUnit,
       durationValue,
       supplierID,
+      quantityToBuy, // Chuyển quantityToBuy
       voucherID: selectedVoucher ? selectedVoucher.vourcherID : ''
     });
   };
