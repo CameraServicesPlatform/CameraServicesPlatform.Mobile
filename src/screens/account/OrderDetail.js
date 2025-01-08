@@ -1,532 +1,352 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  Button,
-  Alert,
-  Modal,
-  Image,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Button, Modal, TextInput } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-// ======= THAY ĐỔI: Dùng expo-image-picker =======
-import * as ImagePicker from 'expo-image-picker';
-
-const ORDER_STATUS_DETAILS = {
-  0: { text: "Chờ xử lý", color: "blue" },
-  1: { text: "Sản phẩm sẵn sàng được giao", color: "green" },
-  2: { text: "Hoàn thành", color: "yellow" },
-  3: { text: "Đã nhận sản phẩm", color: "purple" },
-  4: { text: "Đã giao hàng", color: "cyan" },
-  5: { text: "Thanh toán thất bại", color: "cyan" },
-  6: { text: "Đang hủy", color: "lime" },
-  7: { text: "Đã hủy thành công", color: "red" },
-  8: { text: "Đã Thanh toán", color: "orange" },
-  9: { text: "Hoàn tiền đang chờ xử lý", color: "pink" },
-  10: { text: "Hoàn tiền thành công", color: "brown" },
-  11: { text: "Hoàn trả tiền đặt cọc", color: "gold" },
-  12: { text: "Gia hạn", color: "violet" },
-};
-
-const ORDER_TYPE_DETAILS = {
-  0: "Mua",
-  1: "Thuê",
-};
-
-const OrderDetail = ({ route, navigation }) => {
-  const {
-    orderID,
-    rentalStartDate,
-    rentalEndDate,
-    returnDate,
-    orderStatus,
-    orderType,
-    deliveriesMethod,
-    rentalStartDateRaw,
-  } = route.params || {};
-
-  const [orderDetails, setOrderDetails] = useState([]);
+const OrderDetail = ({ route }) => {
+  const { orderID } = route.params;
+  const [orderDetail, setOrderDetail] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [cancelMessage, setCancelMessage] = useState('');  // New state for cancel message
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const navigation = useNavigation();
 
-  // State cho phần Upload ảnh
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        const response = await fetch(
-          `http://14.225.220.108:2602/orderDetail/get-order-details/${orderID}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-
-        }
-        const data = await response.json();
-        if (data.isSuccess && data.result) {
-          setOrderDetails(data.result);
-          console.log(orderID)
-        } else {
-          console.error('Dữ liệu trả về không hợp lệ:', data.messages);
-        }
-      } catch (error) {
-        console.error('Lỗi khi gọi API:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (orderID) {
-      fetchOrderDetails();
-    }
-  }, [orderID]);
-
-  const reloadOrderDetails = async () => {
-    setLoading(true);
+  const fetchOrderDetail = async () => {
     try {
-      const response = await fetch(
-        `http://14.225.220.108:2602/orderDetail/get-order-details/${orderID}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const response = await fetch(`http://14.225.220.108:2602/order/get-order-of-account-by-order-id?OrderID=${orderID}`);
       const data = await response.json();
-      if (data.isSuccess && data.result) {
-        setOrderDetails(data.result);
+      if (data.isSuccess) {
+        setOrderDetail(data.result[0]);
       } else {
-        console.error('Dữ liệu trả về không hợp lệ:', data.messages);
+        throw new Error(data.messages || 'Failed to fetch order details');
       }
     } catch (error) {
-      console.error('Lỗi khi gọi API:', error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // ====== HÀM CHỌN ẢNH BẰNG expo-image-picker ======
-  const pickImage = async () => {
-    try {
-      // Hỏi quyền truy cập ảnh nếu chưa có
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Thông báo', 'Bạn cần cho phép truy cập thư viện ảnh!');
-        return;
-      }
+  useEffect(() => {
+    fetchOrderDetail();
+  }, [orderID]);
 
-      // Mở thư viện ảnh
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 1,
-      });
-
-      // Kiểm tra user có hủy chọn ảnh hay không
-      if (!result.canceled && result.assets?.length > 0) {
-        setSelectedImage(result.assets[0]); // Lấy asset đầu tiên
-      }
-    } catch (error) {
-      console.error('Lỗi pickImage:', error);
-    }
-  };
-
-  // ====== HÀM XÁC NHẬN TRẢ HÀNG (GỬI ẢNH LÊN SERVER) ======
-  const handleConfirmReturn = async () => {
-    // Kiểm tra đã chọn ảnh chưa
-    if (!selectedImage) {
-      Alert.alert('Thông báo', 'Vui lòng chọn ảnh để tiếp tục!');
-      return;
-    }
-
-    try {
-      // Tạo form data
-      const formData = new FormData();
-      // orderID dạng text
-      formData.append('orderID', orderID.toString());
-
-      // Append file
-      formData.append('image', {
-        uri: selectedImage.uri,
-        name: 'product_image.jpg', // Hoặc tuỳ ý
-        type: 'image/jpeg',
-      });
-
-      // Gửi request 1: upload ảnh
-      const response = await fetch(
-        'http://14.225.220.108:2602/order/add-img-product-after',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          body: formData,
-        }
-      );
-
-      if (response.ok) {
-        // Request 1 thành công -> Gửi request 2 (cập nhật trạng thái)
-        const updateUrl = `http://14.225.220.108:2602/order/update-order-status-pending-refund/${orderID}`;
-        const response2 = await fetch(updateUrl, {
-          method: 'PUT',
-        });
-
-        if (response2.ok) {
-          // Thành công cả 2
-          Alert.alert(
-            'Thành công',
-            'Đã gửi ảnh sản phẩm trả hàng và cập nhật trạng thái hoàn tiền!'
-          );
-          setModalVisible(false);
-          setSelectedImage(null);
-          reloadOrderDetails();
-        } else {
-          throw new Error('Không thể cập nhật trạng thái hoàn tiền.');
-        }
-      } else {
-        throw new Error('Không thể gửi ảnh trả hàng.');
-      }
-    } catch (error) {
-      console.error('Lỗi:', error);
-      Alert.alert('Lỗi', error.message || 'Có lỗi xảy ra.');
-    }
-  };
-
-
-  // Khi nhấn nút "Trả hàng"
-  const handleReturn = () => {
-    setModalVisible(true);
-  };
-
-  // Render từng chi tiết đơn hàng
-  const renderOrderDetailItem = ({ item }) => {
-    const {
-      productName,
-      productPrice,
-      productPriceTotal,
-      discount,
-      periodRental,
-      productQuality,
-      product,
-    } = item;
-
-    // Nút "Đến nhận"
-    const handlePickup = async () => {
-      try {
-        const response = await fetch(
-          `http://14.225.220.108:2602/order/update-order-status-placed/${orderID}`,
-          {
-            method: 'PUT',
-          }
-        );
-        if (response.ok) {
-          Alert.alert('Thành công', 'Trạng thái đã được cập nhật thành công.');
-          reloadOrderDetails();
-        } else {
-          throw new Error('Cập nhật trạng thái thất bại.');
-        }
-      } catch (error) {
-        console.error('Lỗi:', error);
-        Alert.alert('Lỗi', 'Không thể cập nhật trạng thái.');
-      }
-    };
-
-    // Nút "Gia hạn"
-    const handleExtend = () => {
-      navigation.navigate('OrderExtend', {
-        orderID,
-        rentalStartDate,
-        rentalEndDate,
-        returnDate,
-        orderStatus,
-        orderType,
-        deliveriesMethod,
-        product,
-        rentalStartDateRaw,
-      });
-    };
-
-    return (
-      <View style={styles.detailContainer}>
-        <Text style={styles.productName}>{productName}</Text>
-        {product?.productDescription ? (
-          <Text style={styles.description}>{product.productDescription}</Text>
-        ) : null}
-
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Chất lượng: </Text>
-          {productQuality || 'N/A'}
-        </Text>
-
-        {orderType === 1 && rentalStartDate && (
-          <Text style={styles.infoText}>
-            <Text style={styles.label}>Giá cọc: </Text>
-            {product.depositProduct.toLocaleString()} VND
-          </Text>
-        )}
-        {orderType === 0 && rentalStartDate && (
-          <Text style={styles.infoText}>
-            <Text style={styles.label}>Giá mua: </Text>
-            {productPrice?.toLocaleString()} VND
-          </Text>
-        )}
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Thành tiền: </Text>
-          {productPriceTotal?.toLocaleString()} VND
-        </Text>
-
-        {!!discount && discount > 0 && (
-          <Text style={styles.infoText}>
-            <Text style={styles.label}>Giảm giá: </Text>
-            {discount} VND
-          </Text>
-        )}
-
-        {orderStatus !== undefined && (
-          <Text
-            style={[
-              styles.statusText,
-              { color: ORDER_STATUS_DETAILS[orderStatus]?.color },
-            ]}
-          >
-            <Text style={styles.label}>Trạng thái đơn hàng: </Text>
-            {ORDER_STATUS_DETAILS[orderStatus]?.text || 'Không xác định'}
-          </Text>
-        )}
-
-        {orderType !== undefined && (
-          <Text style={styles.infoText}>
-            <Text style={styles.label}>Loại đơn hàng: </Text>
-            {ORDER_TYPE_DETAILS[orderType] || 'Không xác định'}
-          </Text>
-        )}
-
-        {orderType === 1 && rentalStartDate && (
-          <Text style={styles.infoText}>
-            <Text style={styles.label}>Ngày thuê: </Text>
-            {rentalStartDate}
-          </Text>
-        )}
-
-        {orderType === 1 && rentalEndDate && (
-          <Text style={styles.infoText}>
-            <Text style={styles.label}>Ngày hết hạn thuê: </Text>
-            {rentalEndDate}
-          </Text>
-        )}
-
-        {orderType === 1 && returnDate && (
-          <Text style={styles.infoText}>
-            <Text style={styles.label}>Ngày trả thiết bị: </Text>
-            {returnDate}
-          </Text>
-        )}
-
-
-        {/* Nút "Đến nhận" */}
-        {orderStatus === 1 && deliveriesMethod === 0 && (
-          <Button title="Đến nhận" onPress={handlePickup} />
-        )}
-
-        {/* Nút "Trả hàng" => mở Modal */}
-        {orderStatus === 3 && orderType === 0 && (
-          <Button title="Trả hàng" onPress={handleReturn} />
-        )}
-
-        {/* Nút "Gia hạn" */}
-        {orderStatus === 3 && orderType === 1 && (
-          <Button title="Gia hạn" onPress={handleExtend} />
-        )}
-      </View>
-    );
+  const reloadOrderDetails = () => {
+    setLoading(true);
+    setError(null);
+    fetchOrderDetail();
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2e86de" />
-        <Text style={styles.loadingText}>Đang tải chi tiết đơn hàng...</Text>
+        <ActivityIndicator size="large" color="#007bff" />
+        <Text style={styles.loadingText}>Loading order details...</Text>
       </View>
     );
   }
 
-  if (!orderDetails || orderDetails.length === 0) {
+  if (error || !orderDetail) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Không có chi tiết nào cho đơn hàng này.</Text>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error: {error || 'Order details not found.'}</Text>
       </View>
     );
   }
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'Không có dữ liệu';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+
+  const {
+    orderID: orderId,
+    accountID,
+    orderDate,
+    totalAmount,
+    orderStatus,
+    orderDetails = [],
+    deposit,
+    reservationMoney,
+    returnDate,
+    rentalStartDate,
+    rentalEndDate,
+    orderType,
+  } = orderDetail;
+
+  const orderStatusReturnMapping = {
+    0: { label: "Đang xử lý", color: "#ff9900" },
+    1: { label: "Đã phê duyệt", color: "#007bff" },
+    2: { label: "Hoàn thành", color: "#28a745" },
+    3: { label: "Đã đặt", color: "#17a2b8" },
+    4: { label: "Đã giao hàng", color: "#6f42c1" },
+    5: { label: "Thanh toán thất bại", color: "#dc3545" },
+    6: { label: "Đang hủy", color: "#ffc107" },
+    7: { label: "Đã hủy", color: "#dc3545" },
+    8: { label: "Đã thanh toán", color: "#20c997" },
+    9: { label: "Đang hoàn tiền", color: "#ff9800" },
+    10: { label: "Đã hoàn tiền", color: "#4caf50" },
+    11: { label: "Trả cọc", color: "#9c27b0" },
+    12: { label: "Gia hạn", color: "#3f51b5" },
+    default: { label: "Không xác định", color: "#555" },
+  };
+
+  const statusInfo = orderStatusReturnMapping[orderStatus] || orderStatusReturnMapping.default;
+
+  const handlePickup = async () => {
+    try {
+      const response = await fetch(`http://14.225.220.108:2602/order/update-order-status-placed/${orderID}`, {
+        method: 'PUT',
+      });
+      if (response.ok) {
+        Alert.alert('Thành công', 'Trạng thái đã được cập nhật thành công.');
+        reloadOrderDetails();
+      } else {
+        throw new Error('Cập nhật trạng thái thất bại.');
+      }
+    } catch (error) {
+      console.error('Lỗi:', error);
+      Alert.alert('Lỗi', 'Không thể cập nhật trạng thái.');
+    }
+  };
+
+  const handleReturn = async () => {
+    const returnDate = new Date().toISOString();
+    const body = { orderID, returnDate, condition: "" };
+
+    try {
+      const response = await fetch('http://14.225.220.108:2602/returnDetail/create-return-for-member', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (response.ok) {
+        Alert.alert('Thành công', 'Đã tạo yêu cầu trả hàng thành công.');
+        reloadOrderDetails();
+      } else {
+        throw new Error('Tạo yêu cầu trả hàng thất bại.');
+      }
+    } catch (error) {
+      console.error('Lỗi:', error);
+      Alert.alert('Lỗi', 'Không thể tạo yêu cầu trả hàng.');
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!cancelMessage.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập lý do hủy đơn hàng.');
+      return;
+    }
+
+    const body = {
+      orderID,
+      cancelMessage,
+    };
+
+    try {
+      const response = await fetch('http://14.225.220.108:2602/order/cancel-order', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        Alert.alert('Thành công', 'Đơn hàng đã được hủy.');
+        reloadOrderDetails();
+        setIsModalVisible(false);  // Đóng modal
+      } else {
+        throw new Error('Không thể hủy đơn hàng.');
+      }
+    } catch (error) {
+      Alert.alert('Lỗi', 'Không thể hủy đơn hàng.');
+    }
+  };
+
+  const handleExtend = () => {
+    // Ensure you pass all necessary params to the navigation
+    navigation.navigate('OrderExtend', {
+      orderID,
+      rentalStartDate,
+      rentalEndDate,
+      returnDate,
+      orderStatus,
+      orderType,
+      product: orderDetails[0],  // Example of passing product data
+    });
+  };
+
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Chi tiết đơn hàng</Text>
-      <FlatList
-        data={orderDetails}
-        keyExtractor={(item) => item.orderDetailsID}
-        renderItem={renderOrderDetailItem}
-        contentContainerStyle={styles.listContainer}
-      />
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Chi tiết Đơn Hàng</Text>
+      <View style={[styles.orderSummary, { borderColor: statusInfo.color }]}>
+        <Text style={[styles.text1, { color: statusInfo.color }]}>
+          Trạng thái đơn hàng: {statusInfo.label}
+        </Text>
+      </View>
+      <View style={styles.orderInfoSection}>
+        <Text style={styles.text}>Hóa đơn: {orderId || "N/A"}</Text>
+        <Text style={styles.text}>Loại hóa đơn: {orderType === 1 ? "Thuê" : "Mua"}</Text>
+        <Text style={styles.text}>Ngày đặt: {formatDateTime(orderDate) || "N/A"}</Text>
+        {orderType === 1 && (
+          <>
+            <Text style={styles.text}>Ngày nhận: {formatDateTime(rentalStartDate) || "N/A"}</Text>
+            <Text style={styles.text}>Ngày kết thúc: {formatDateTime(rentalEndDate) || "N/A"}</Text>
+            <Text style={styles.text}>Ngày trả: {formatDateTime(returnDate) || "N/A"}</Text>
+          </>
+        )}
+      </View>
+      <View style={styles.productInfoSection}>
+        <Text style={styles.subTitle}>Thông tin sản phẩm</Text>
+        <Text style={styles.text}>Tên sản phẩm: {orderDetails[0]?.productName || "N/A"}</Text>
+        <Text style={styles.text}>Mã sản phẩm: {orderDetails[0]?.serialNumber || "N/A"}</Text>
+        <Text style={styles.text}>Giá: {orderDetails[0]?.productPrice?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
+        {orderType === 1 && (
+          <>
+            <Text style={styles.text}>Tiền cọc: {deposit?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
+            <Text style={styles.text}>Giữ chỗ: {reservationMoney?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
+          </>
+        )}
+        <Text style={styles.text}>Giảm giá: {orderDetails[0]?.discount || 0}%</Text>
+      </View>
+      <Text style={styles.total}>Tổng cộng: {totalAmount?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
+      <View style={styles.buttonContainer}>
+        {/* Extend rental button */}
+        {orderType === 1 && (
+          <TouchableOpacity style={[styles.button, styles.buttonPrimary]} onPress={handleExtend}>
+            <Text style={styles.buttonText}>Gia hạn đơn thuê</Text>
+          </TouchableOpacity>
+        )}
 
-      {/* MODAL HIỂN THỊ KHI TRẢ HÀNG */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
+        {/* Review button (if order status is 'Completed') */}
+        {orderStatus === 2 && (
+          <TouchableOpacity
+            style={[styles.button, styles.buttonDanger]}
+            onPress={() => navigation.navigate('RatingProduct', {
+              productID: orderDetails[0]?.productID,
+              accountID: accountID,
+            })}
+          >
+            <Text style={styles.buttonText}>Đánh giá</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Return product button (if order status is 'Shipped' and order type is 'Purchase') */}
+        {orderStatus === 2 && orderType === 0 && (
+          <TouchableOpacity style={[styles.button, styles.buttonReturn]} onPress={handleReturn}>
+            <Text style={styles.buttonText}>Trả hàng</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Cancel order button */}
+        {orderStatus === 0 && (
+        <TouchableOpacity
+          style={[styles.button, styles.buttonCancel]}
+          onPress={() => setIsModalVisible(true)}
+        >
+          <Text style={styles.buttonText}>Hủy đơn hàng</Text>
+        </TouchableOpacity>
+                )}
+      </View>
+      <Modal visible={isModalVisible} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tạo yêu cầu trả hàng</Text>
-
-            {/* Nút chọn ảnh */}
-            <Button title="Chọn ảnh" onPress={pickImage} />
-
-            {/* Hiển thị ảnh đã chọn (nếu có) */}
-            {selectedImage && (
-              <Image
-                source={{ uri: selectedImage.uri }}
-                style={styles.previewImage}
-              />
-            )}
-
-            {/* Hai nút Hủy / Trả */}
-            <View style={styles.modalButtonRow}>
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: 'gray' }]}
-                onPress={() => {
-                  setModalVisible(false);
-                  setSelectedImage(null);
-                }}
-              >
-                <Text style={styles.modalButtonText}>Hủy</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: 'tomato' }]}
-                onPress={handleConfirmReturn}
-              >
-                <Text style={styles.modalButtonText}>Trả</Text>
-              </TouchableOpacity>
+            <Text style={styles.title}>Lý do hủy đơn hàng</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={cancelMessage}
+              onChangeText={setCancelMessage}
+              placeholder="Nhập lý do hủy"
+              multiline
+            />
+            <View style={styles.modalButtons}>
+              <Button title="Hủy" onPress={() => setIsModalVisible(false)} />
+              <Button title="Xác nhận" onPress={handleCancelOrder} />
             </View>
           </View>
         </View>
       </Modal>
-      {/* KẾT THÚC MODAL */}
-    </View>
+    </ScrollView>
   );
 };
 
-export default OrderDetail;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-  },
-  errorText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: 'red',
+  container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
+  title: { fontSize: 20, fontWeight: "bold", marginBottom: 16, textAlign: "center" },
+  orderSummary: { borderWidth: 2, padding: 15, marginBottom: 4 },
+  orderInfoSection: { backgroundColor: "#fff", padding: 16, borderRadius: 8, marginBottom: 16, elevation: 3 },
+  productInfoSection: { backgroundColor: "#fff", padding: 16, borderRadius: 8, marginBottom: 16, elevation: 3 },
+  text: { fontSize: 17, marginBottom: 8 },
+  text1: { fontSize: 16, marginBottom: 4, textAlign: "center" },
+  subTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 8, textAlign: "center" },
+  total: { fontSize: 18, fontWeight: "bold", textAlign: "center", marginVertical: 16 },
+  buttonContainer: {
+    flexDirection: 'column',
     marginTop: 20,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginHorizontal: 20,
-    marginBottom: 10,
-    color: '#333',
-  },
-  listContainer: {
+  button: {
+    marginBottom: 10, // Ensures spacing between buttons
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  detailContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+  buttonPrimary: {
+    backgroundColor: '#007bff',
   },
-  productName: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 6,
-    color: '#2c3e50',
+  buttonDanger: {
+    backgroundColor: '#dc3545',
   },
-  description: {
-    fontSize: 14,
-    marginBottom: 10,
-    color: '#555',
+  buttonReturn: {
+    backgroundColor: '#28a745',
   },
-  infoText: {
-    fontSize: 15,
-    marginBottom: 6,
-    color: '#333',
+  buttonCancel: {
+    backgroundColor: '#ffc107',
   },
-  label: {
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#000',
   },
-  statusText: {
-    fontSize: 15,
-    marginBottom: 6,
-  },
-  // ===== STYLES CHO MODAL =====
-  modalOverlay: {
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { fontSize: 16, marginTop: 10, color: "#555" },
+  errorContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  errorText: { fontSize: 16, color: "red" },
+  modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '85%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    backgroundColor: 'white',
     padding: 20,
-    elevation: 5,
+    borderRadius: 10,
+    width: '80%',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-    color: '#333',
+    marginBottom: 10,
   },
-  previewImage: {
-    width: 100,
+  modalInput: {
     height: 100,
-    marginVertical: 10,
-    alignSelf: 'center',
-    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 20,
+    padding: 10,
   },
-  modalButtonRow: {
+  modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 15,
-  },
-  modalButton: {
-    borderRadius: 6,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    justifyContent: 'space-between',
   },
 });
+
+export default OrderDetail;
