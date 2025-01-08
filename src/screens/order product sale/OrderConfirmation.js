@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Button, Alert, ActivityIndicator, TouchableOpac
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Linking } from 'react-native';
 
-const OrderConfirmation = ({ route, navigation }) => {
+const OrderConfirmation = ({ route, navigation }) => { // Đảm bảo navigation được truyền vào
   const { 
     productID, 
     voucherID, 
@@ -78,6 +78,34 @@ const OrderConfirmation = ({ route, navigation }) => {
       return;
     }
 
+    // Chuyển đổi durationUnit từ chuỗi sang số
+    let durationUnitValue;
+    switch (durationUnit) {
+      case 'hour':
+        durationUnitValue = 0;
+        break;
+      case 'day':
+        durationUnitValue = 1;
+        break;
+      case 'week':
+        durationUnitValue = 2;
+        break;
+      case 'month':
+        durationUnitValue = 3;
+        break;
+      default:
+        durationUnitValue = null;
+        break;
+    }
+
+    if (durationUnitValue === null) {
+      Alert.alert('Lỗi', 'Đơn vị thời gian không hợp lệ.');
+      setLoading(false);
+      return;
+    }
+
+    const reservationMoney = 0; // Nếu cần sử dụng reservationMoney từ API, hãy thêm logic tương ứng
+
     const orderPayload = {
       supplierID: supplierID || '',
       accountID: accountID,
@@ -85,7 +113,7 @@ const OrderConfirmation = ({ route, navigation }) => {
       productID,
       orderDate: new Date().toISOString(),
       orderStatus: 0,
-      totalAmount: 0,
+      totalAmount: totalPrice || 0,
       orderType: 0, // Đặt hàng mua
       shippingAddress: shippingAddress || '',
       deliveryMethod: deliveryMethod,
@@ -146,41 +174,34 @@ const OrderConfirmation = ({ route, navigation }) => {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Đang xử lý...</Text>
+        <Text style={styles.loadingText}>Đang xử lý...</Text>
       </View>
     );
   }
 
+  // Hàm helper để hiển thị "Đang cập nhật" nếu item.quality rỗng hoặc null
+  const displayQuality = (quality) => {
+    return quality && quality.trim() !== '' ? quality : 'Đang cập nhật';
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Xác nhận Đơn hàng</Text>
-      <Text style={styles.text}>Mã sản phẩm: {productID}</Text>
-      <Text style={styles.text}>
-        Phương thức giao hàng: {deliveryMethod === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng tận nơi'}
+      
+
+      {/* Thêm dòng chữ Lưu ý */}
+      <Text style={styles.noteText}>
+        Lưu ý hãy đọc kỹ các{' '}
+        <Text style={styles.linkText} onPress={() => navigation.navigate('Policy')}>
+          chính sách
+        </Text>
+        {' '}của chúng tôi.
       </Text>
-      {deliveryMethod === 1 && (
-        <Text style={styles.text}>Địa chỉ giao hàng: {shippingAddress}</Text>
-      )}
 
-      {voucherID ? (
-        voucherInfo ? (
-          <View style={styles.voucherContainer}>
-            <Text style={styles.text}>Voucher ID: {voucherInfo.vourcherID}</Text>
-            <Text style={styles.text}>Mô tả: {voucherInfo.description}</Text>
-            <Text style={styles.text}>Giảm giá: {voucherInfo.discountAmount.toLocaleString()} vnđ</Text>
-          </View>
-        ) : (
-          <Text style={styles.text}>Không thể lấy thông tin voucher.</Text>
-        )
-      ) : (
-        <Text style={styles.text}>Voucher: Không có</Text>
-      )}
-
-      <Text style={styles.text}>Nhà cung cấp (SupplierID): {supplierID || 'Không có'}</Text>
       <Button title="Hoàn tất Đặt hàng" onPress={handleCompleteOrder} />
       {apiResponse && (
         <TouchableOpacity style={styles.paymentButton} onPress={handlePayment}>
-          <Text style={styles.paymentButtonText} >Thanh toán</Text>
+          <Text style={styles.paymentButtonText}>Thanh toán</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -198,10 +219,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#333',
   },
   text: {
     fontSize: 16,
     marginBottom: 10,
+    color: '#555',
   },
   voucherContainer: {
     marginBottom: 10,
@@ -220,6 +243,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#555',
+  },
+  noteText: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    marginVertical: 15,
+  },
+  linkText: {
+    color: '#007BFF',
+    textDecorationLine: 'underline',
   },
 });
 

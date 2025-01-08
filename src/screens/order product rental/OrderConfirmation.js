@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Button, Alert, ActivityIndicator, TouchableOpac
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Linking } from 'react-native';
 
-const OrderConfirmation = ({ route }) => {
+const OrderConfirmation = ({ route, navigation }) => { // Thêm navigation vào props
   const {
     productID,
     voucherID,
@@ -22,7 +22,10 @@ const OrderConfirmation = ({ route }) => {
 
   const [loading, setLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
+  const [reservationMoney, setReservationMoney] = useState(null); // Thêm state để lưu reservationMoney
+  const [reservationLoading, setReservationLoading] = useState(true); // State để quản lý loading của reservationMoney
 
+  // Hàm fetchReservationMoney được cập nhật để lưu reservationMoney vào state
   const fetchReservationMoney = async () => {
     try {
       const response = await fetch('http://14.225.220.108:2602/SystemAdmin/get-new-reservation-money');
@@ -31,15 +34,21 @@ const OrderConfirmation = ({ route }) => {
       }
       const data = await response.json();
       if (data.isSuccess && data.result) {
-        return data.result.reservationMoney;
+        setReservationMoney(data.result.reservationMoney);
       } else {
         throw new Error(data.messages?.[0] || 'Không thể lấy giá trị reservationMoney');
       }
     } catch (error) {
       console.error('Lỗi khi lấy reservationMoney:', error);
-      throw error;
+      Alert.alert('Lỗi', 'Không thể lấy phí trả trước.');
+    } finally {
+      setReservationLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchReservationMoney();
+  }, []);
 
   const handleCompleteOrder = async () => {
     setLoading(true);
@@ -77,14 +86,19 @@ const OrderConfirmation = ({ route }) => {
     }
 
     try {
-      const reservationMoney = await fetchReservationMoney();
+      // Sử dụng reservationMoney từ state thay vì gọi lại API
+      if (reservationMoney === null) {
+        Alert.alert('Lỗi', 'Không thể lấy phí trả trước.');
+        setLoading(false);
+        return;
+      }
 
       const orderPayload = {
         supplierID: supplierID || '',
         accountID: accountID,
-        productID,
-        productPriceRent: productPriceRent || 0,
         voucherID: voucherID || '',
+        productID,
+        orderDate: new Date().toISOString(),
         orderStatus: 0,
         totalAmount: totalPrice || 0,
         orderType: 0, // Đặt hàng thuê
@@ -96,7 +110,7 @@ const OrderConfirmation = ({ route }) => {
         durationValue: durationValue,
         returnDate,
         deliveryMethod: shippingMethod,
-        reservationMoney, // Giá trị từ API
+        reservationMoney, // Giá trị từ state
       };
 
       console.log('Payload gửi đi:', JSON.stringify(orderPayload, null, 2));
@@ -113,7 +127,7 @@ const OrderConfirmation = ({ route }) => {
         setApiResponse(data.result);
 
         const newEntry = {
-          productName: productID,
+          productName: productID, // Nếu đã thay đổi thành productName ở các bước trước, cập nhật đây
           paymentLink: data.result,
           timestamp: new Date().toISOString(),
         };
@@ -128,6 +142,7 @@ const OrderConfirmation = ({ route }) => {
         Alert.alert('Lỗi', 'Không thể tạo đơn hàng.');
       }
     } catch (error) {
+      console.error('Lỗi khi gửi đơn hàng:', error);
       Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xử lý đơn hàng.');
     } finally {
       setLoading(false);
@@ -144,25 +159,37 @@ const OrderConfirmation = ({ route }) => {
     }
   };
 
-  if (loading) {
+  if (loading || reservationLoading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Đang xử lý đơn hàng...</Text>
+        <Text style={styles.loadingText}>Đang xử lý đơn hàng...</Text>
       </View>
     );
   }
 
+  // Hàm helper để hiển thị "Đang cập nhật" nếu quality rỗng hoặc null
+  const displayQuality = (quality) => {
+    return quality && quality.trim() !== '' ? quality : 'Đang cập nhật';
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Xác nhận Đơn hàng</Text>
-      <Text style={styles.text}>Mã sản phẩm: {productID}</Text>
-      <Text style={styles.text}>Phương thức giao hàng: {deliveryMethod === 0 ? 'Giao hàng tận nơi' : 'Nhận tại cửa hàng'}</Text>
-      {deliveryMethod === 1 && (
-        <Text style={styles.text}>Địa chỉ giao hàng: {shippingAddress}</Text>
-      )}
-      <Text style={styles.text}>Voucher: {voucherID || 'Không có'}</Text>
-      <Text style={styles.text}>Nhà cung cấp: {supplierID}</Text>
+      <Text style={styles.text}>
+        Phí trả trước là: {reservationMoney !== null ? `${reservationMoney.toLocaleString()} vnđ` : 'Đang cập nhật'}
+      </Text>
+      
+
+      {/* Thêm dòng chữ Lưu ý */}
+      <Text style={styles.noteText}>
+        Lưu ý hãy đọc kỹ các{' '}
+        <Text style={styles.linkText} onPress={() => navigation.navigate('Policy')}>
+          chính sách
+        </Text>
+        {' '}của chúng tôi.
+      </Text>
+
       <Button title="Hoàn tất Đặt hàng" onPress={handleCompleteOrder} />
       {apiResponse && (
         <TouchableOpacity style={styles.paymentButton} onPress={handlePayment}>
@@ -184,15 +211,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#333',
   },
   text: {
     fontSize: 16,
     marginBottom: 10,
+    color: '#555',
   },
   paymentButton: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: '#007BFF',
+    backgroundColor: '#28a745',
     borderRadius: 10,
     alignItems: 'center',
   },
@@ -200,6 +229,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#555',
+  },
+  noteText: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    marginVertical: 15,
+  },
+  linkText: {
+    color: '#007BFF',
+    textDecorationLine: 'underline',
   },
 });
 

@@ -33,31 +33,31 @@ const SupplierDetailModal = ({ visible, supplier, onClose }) => {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Mô tả:</Text>
               <Text style={styles.infoValue}>
-                {supplier.supplierDescription || 'Không có'}
+                {supplier.supplierDescription || 'Đang cập nhật'}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Địa chỉ:</Text>
               <Text style={styles.infoValue}>
-                {supplier.supplierAddress || 'Không có'}
+                {supplier.supplierAddress || 'Đang cập nhật'}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Liên hệ:</Text>
               <Text style={styles.infoValue}>
-                {supplier.contactNumber || 'Không có'}
+                {supplier.contactNumber || 'Đang cập nhật'}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Ngày tạo:</Text>
               <Text style={styles.infoValue}>
-                {supplier.createdAt || 'Không có'}
+                {supplier.createdAt || 'Đang cập nhật'}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Ngày cập nhật:</Text>
               <Text style={styles.infoValue}>
-                {supplier.updatedAt || 'Không có'}
+                {supplier.updatedAt || 'Đang cập nhật'}
               </Text>
             </View>
           </ScrollView>

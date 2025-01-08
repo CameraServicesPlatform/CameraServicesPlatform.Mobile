@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, ScrollView, ActivityIndicator, Alert, Image } from 'react-native';
 
 const ReviewOrder = ({ route, navigation }) => {
   const {
@@ -85,101 +85,116 @@ const ReviewOrder = ({ route, navigation }) => {
     });
   };
 
-    if (loading) {
-        return (
-            <View style={styles.container}>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text style={styles.loadingText}>Đang tải thông tin...</Text>
-            </View>
-        );
-    }
-
+  if (loading) {
     return (
-        <View style={styles.outerContainer}>
-            <ScrollView style={styles.container}>
-                <Text style={styles.title}>Review Order</Text>
-
-                {productDetails && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Thông tin sản phẩm</Text>
-                        <Text style={styles.text}>Tên sản phẩm: {productDetails.productName}</Text>
-                        <Text style={styles.text}>Mô tả: {productDetails.productDescription}</Text>
-                        <Text style={styles.text}>Giá thuê/giờ: {productDetails.pricePerHour?.toLocaleString() || 'Không có'} vnđ</Text>
-                        <Text style={styles.text}>Giá thuê/ngày: {productDetails.pricePerDay?.toLocaleString() || 'Không có'} vnđ</Text>
-                        <Text style={styles.text}>Giá thuê/tuần: {productDetails.pricePerWeek?.toLocaleString() || 'Không có'} vnđ</Text>
-                        <Text style={styles.text}>Giá thuê/tháng: {productDetails.pricePerMonth?.toLocaleString() || 'Không có'} vnđ</Text>
-                        <Text style={styles.text}>Đánh giá: {productDetails.rating} ⭐</Text>
-                    </View>
-                )}
-
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Thông tin thời gian thuê và giao hàng</Text>
-                    <Text style={styles.text}>Ngày bắt đầu thuê: {formatDateTime(startDate)}</Text>
-                    <Text style={styles.text}>Ngày kết thúc thuê: {formatDateTime(endDate)}</Text>
-                    <Text style={styles.text}>Ngày trả hàng: {formatDateTime(returnDate)}</Text>
-                    <Text style={styles.text}>Tổng giá tiền: {totalPrice.toLocaleString()} vnđ</Text>
-                    <Text style={styles.text}>Phương thức giao hàng: {shippingMethod === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng tận nơi'}</Text>
-                    {shippingMethod === 1 && <Text style={styles.text}>Địa chỉ giao hàng: {address}</Text>}
-                </View>
-
-                {voucherDetails ? (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Thông tin voucher</Text>
-                        <Text style={styles.text}>Mã giảm giá: {voucherDetails.vourcherCode}</Text>
-                        <Text style={styles.text}>Mô tả: {voucherDetails.description}</Text>
-                        <Text style={styles.text}>Số tiền giảm: {voucherDetails.discountAmount.toLocaleString()} vnđ</Text>
-                    </View>
-                ) : (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Thông tin voucher</Text>
-                        <Text style={styles.text}>Không sử dụng voucher</Text>
-                    </View>
-                )}
-            </ScrollView>
-            <View style={styles.buttonContainer}>
-                <Button title="Xác nhận" onPress={handleNext} />
-            </View>
-        </View>
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Đang tải thông tin...</Text>
+      </View>
     );
+  }
+
+  return (
+    <View style={styles.outerContainer}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Review Order</Text>
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: productDetails.listImage[0].image }}
+            style={styles.productImage}
+            resizeMode="cover"
+          />
+        </View>
+        {productDetails && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Thông tin sản phẩm</Text>
+            <Text style={styles.text}>Tên sản phẩm: {productDetails.productName}</Text>
+            <Text style={styles.text}>Mô tả: {productDetails.productDescription}</Text>
+            <Text style={styles.text}>Giá thuê/giờ: {productDetails.pricePerHour?.toLocaleString() || 'Không có'} vnđ</Text>
+            <Text style={styles.text}>Giá thuê/ngày: {productDetails.pricePerDay?.toLocaleString() || 'Không có'} vnđ</Text>
+            <Text style={styles.text}>Giá thuê/tuần: {productDetails.pricePerWeek?.toLocaleString() || 'Không có'} vnđ</Text>
+            <Text style={styles.text}>Giá thuê/tháng: {productDetails.pricePerMonth?.toLocaleString() || 'Không có'} vnđ</Text>
+            <Text style={styles.text}>Đánh giá: {productDetails.rating} ⭐</Text>
+          </View>
+        )}
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Thông tin thời gian thuê và giao hàng</Text>
+          <Text style={styles.text}>Ngày bắt đầu thuê: {formatDateTime(startDate)}</Text>
+          <Text style={styles.text}>Ngày kết thúc thuê: {formatDateTime(endDate)}</Text>
+          <Text style={styles.text}>Ngày trả hàng: {formatDateTime(returnDate)}</Text>
+          <Text style={styles.text}>Tổng giá tiền: {totalPrice.toLocaleString()} vnđ</Text>
+          <Text style={styles.text}>Phương thức giao hàng: {shippingMethod === 0 ? 'Giao hàng tận nơi' : 'Nhận tại cửa hàng'}</Text>
+          {shippingMethod === 0 && <Text style={styles.text}>Địa chỉ giao hàng: {address}</Text>}
+        </View>
+
+        {voucherDetails ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Thông tin voucher</Text>
+            <Text style={styles.text}>Mã giảm giá: {voucherDetails.vourcherCode}</Text>
+            <Text style={styles.text}>Mô tả: {voucherDetails.description}</Text>
+            <Text style={styles.text}>Số tiền giảm: {voucherDetails.discountAmount.toLocaleString()} vnđ</Text>
+          </View>
+        ) : (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Thông tin voucher</Text>
+            <Text style={styles.text}>Không sử dụng voucher</Text>
+          </View>
+        )}
+      </ScrollView>
+      <View style={styles.buttonContainer}>
+        <Button title="Xác nhận" onPress={handleNext} />
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    outerContainer: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    section: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    text: {
-        fontSize: 16,
-        marginBottom: 5,
-    },
-    loadingText: {
-        fontSize: 16,
-        textAlign: 'center',
-    },
-    buttonContainer: {
-        padding: 20,
-        borderTopWidth: 1,
-        borderColor: '#ccc',
-        backgroundColor: '#fff',
-    },
+  outerContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  text: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  loadingText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  productImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+  },
 });
 
 export default ReviewOrder;

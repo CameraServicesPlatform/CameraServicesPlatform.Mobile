@@ -34,7 +34,7 @@ const ProductCard = ({ item, isFavorite, onToggleFavorite }) => {
           name={isFavorite ? 'heart' : 'heart-outline'}
           size={24}
           color={"red"}
-          
+
         />
       </TouchableOpacity>
 
@@ -46,12 +46,11 @@ const ProductCard = ({ item, isFavorite, onToggleFavorite }) => {
         <Text style={styles.productName}>{item.productName}</Text>
 
         {/* Sử dụng hàm formatDate để hiển thị ngày tháng năm */}
+
         <Text style={styles.productText}>
-          Ngày sản xuất: {item.dateOfManufacture ? formatDateTime(item.dateOfManufacture) : 'Không có'}
+          Loại hàng: {item.quality || 'Đang cập nhật'}
         </Text>
-        <Text style={styles.productText}>
-            Loại hàng: {item.quality}
-          </Text>
+
 
         {item.priceBuy ? (
           // Hiển thị giá mua nếu priceBuy khác null
@@ -62,16 +61,16 @@ const ProductCard = ({ item, isFavorite, onToggleFavorite }) => {
           // Hiển thị giá thuê nếu priceBuy là null
           <>
             <Text style={styles.productText}>
-              Giá thuê giờ: {item.pricePerHour ? `${item.pricePerHour.toLocaleString()} vnđ` : 'Không có'}
+              Giá thuê giờ: {item.pricePerHour ? `${item.pricePerHour.toLocaleString()} vnđ` : 'Đang cập nhật'}
             </Text>
             <Text style={styles.productText}>
-              Giá thuê ngày: {item.pricePerDay ? `${item.pricePerDay.toLocaleString()} vnđ` : 'Không có'}
+              Giá thuê ngày: {item.pricePerDay ? `${item.pricePerDay.toLocaleString()} vnđ` : 'Đang cập nhật'}
             </Text>
             <Text style={styles.productText}>
-              Giá thuê tuần: {item.pricePerWeek ? `${item.pricePerWeek.toLocaleString()} vnđ` : 'Không có'}
+              Giá thuê tuần: {item.pricePerWeek ? `${item.pricePerWeek.toLocaleString()} vnđ` : 'Đang cập nhật'}
             </Text>
             <Text style={styles.productText}>
-              Giá thuê tháng: {item.pricePerMonth ? `${item.pricePerMonth.toLocaleString()} vnđ` : 'Không có'}
+              Giá thuê tháng: {item.pricePerMonth ? `${item.pricePerMonth.toLocaleString()} vnđ` : 'Đang cập nhật'}
             </Text>
           </>
         )}

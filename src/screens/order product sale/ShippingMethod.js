@@ -13,7 +13,7 @@ const ShippingMethod = ({ route, navigation }) => {
       return;
     }
 
-    if (shippingMethod === 1 && !address.trim()) {
+    if (shippingMethod === 0 && !address.trim()) {
       setError('Vui lòng nhập địa chỉ giao hàng.');
       return;
     }
@@ -47,14 +47,14 @@ const ShippingMethod = ({ route, navigation }) => {
           title="Nhận tại cửa hàng"
           color={shippingMethod === 1 ? 'green' : 'gray'}
           onPress={() => {
-            setShippingMethod(0);
+            setShippingMethod(1);
             setAddress(''); // Reset địa chỉ nếu chọn nhận tại cửa hàng
           }}
         />
         <Button
           title="Giao hàng tận nơi"
           color={shippingMethod === 0 ? 'green' : 'gray'}
-          onPress={() => setShippingMethod(1)}
+          onPress={() => setShippingMethod(0)}
         />
       </View>
 

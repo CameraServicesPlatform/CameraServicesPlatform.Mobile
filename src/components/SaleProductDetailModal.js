@@ -105,15 +105,19 @@ const SaleProductDetailModal = ({ visible, productId, onClose }) => {
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Mô tả:</Text>
-              <Text style={styles.infoValue}>{productData.productDescription || 'Không có'}</Text>
+              <Text style={styles.infoValue}>{productData.productDescription || 'Đang cập nhật'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá mua:</Text>
               <Text style={styles.infoValue}>
                 {productData.priceBuy
                   ? productData.priceBuy.toLocaleString()
-                  : 'Không có'} vnđ
+                  : 'Đang cập nhật'} vnđ
               </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Số lượng:</Text>
+              <Text style={styles.infoValue}>{productData.quantity || 0}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Đánh giá:</Text>

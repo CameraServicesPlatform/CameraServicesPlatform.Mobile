@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icon
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icon từ MaterialCommunityIcons
 
 // Import các màn hình
 import HomeScreen from './src/screens/HomeScreen';
@@ -21,13 +21,13 @@ import ProductSaleStack from './src/stacks/ProductSaleStack';
 
 const Drawer = createDrawerNavigator();
 
+// Hàm tạo HOC để reload dữ liệu khi màn hình được focus
 const ReloadableScreen = (Component, reloadFunction) => (props) => {
   useFocusEffect(
     useCallback(() => {
       reloadFunction();
     }, [])
   );
-
   return <Component {...props} />;
 };
 
@@ -55,6 +55,7 @@ export default function App() {
     }
   };
 
+  // Custom Drawer
   const CustomDrawerContent = (props) => (
     <DrawerContentScrollView {...props}>
       <View style={styles.logoContainer}>
@@ -84,6 +85,7 @@ export default function App() {
             ),
           }}
         />
+
         <Drawer.Screen
           name="Category"
           component={ReloadableScreen(Category, () => console.log('Reloading Category Data...'))}
@@ -95,6 +97,8 @@ export default function App() {
             ),
           }}
         />
+
+        {/** Thay icon "car-rental" bằng "car" hoặc icon thích hợp khác */}
         <Drawer.Screen
           name="RentalProduct"
           component={ReloadableScreen(RentalProduct, () => console.log('Reloading Rental Product Data...'))}
@@ -102,10 +106,11 @@ export default function App() {
             headerShown: true,
             title: 'Sản phẩm thuê',
             drawerIcon: ({ color, size }) => (
-              <Icon name="car-rental" color={color} size={size} />
+              <Icon name="cart" color={color} size={size} />
             ),
           }}
         />
+
         <Drawer.Screen
           name="ProductSale"
           component={ReloadableScreen(ProductSaleStack, () => console.log('Reloading Product Sale Data...'))}
@@ -150,6 +155,7 @@ export default function App() {
             ),
           }}
         />
+
         {!isLoggedIn && (
           <>
             <Drawer.Screen
@@ -178,6 +184,7 @@ export default function App() {
             />
           </>
         )}
+
         {isLoggedIn && (
           <>
             <Drawer.Screen

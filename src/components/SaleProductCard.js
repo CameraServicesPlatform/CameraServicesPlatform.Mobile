@@ -50,6 +50,9 @@ const SaleProductCard = ({ item, isFavorite, onToggleFavorite }) => {
                     Loại hàng: {item.quality}
                 </Text>
                 <Text style={styles.productText}>
+                    Số lượng: {item.quantity}
+                </Text>
+                <Text style={styles.productText}>
                     Đánh giá: {item.rating || 0} ⭐
                 </Text>
             </View>

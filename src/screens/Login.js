@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Nếu bạn cần icon FontAwesome
+import Icon from 'react-native-vector-icons/FontAwesome'; // Cần cài đặt react-native-vector-icons
 
 // Nếu chạy trên React Native, cần bảo đảm atob khả dụng.
 // import { decode as atob } from 'base-64';
@@ -50,7 +52,7 @@ const Login = ({ navigation, onLoginSuccess }) => {
         body: JSON.stringify(payload),
       });
 
-      // Parse JSON từ response (đoạn này có thể giữ nguyên vì API login chắc chắn trả về JSON)
+      // Parse JSON từ response
       const data = await response.json();
       console.log('Login response data:', data);
 
@@ -98,15 +100,10 @@ const Login = ({ navigation, onLoginSuccess }) => {
   const handleSendActiveCode = async () => {
     const apiSendEmail = `http://14.225.220.108:2602/account/send-email-for-activeCode/${email}`;
     try {
-      const response = await fetch(apiSendEmail, {
+      await fetch(apiSendEmail, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-
-      // Tuỳ backend, API này có thể trả về JSON hoặc không.
-      // Nếu bạn cần parse:
-      // const data = await response.json();
-      // console.log('SendActiveCode response data:', data);
 
       // Đóng modal "Xác thực"
       setShowConfirmModal(false);
@@ -127,7 +124,6 @@ const Login = ({ navigation, onLoginSuccess }) => {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      // Thay vì gọi thẳng response.json(), ta log trước, rồi parse trong try/catch
       const rawText = await response.text();
       console.log('Raw response from server (active-account):', rawText);
 
@@ -138,10 +134,9 @@ const Login = ({ navigation, onLoginSuccess }) => {
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
         Alert.alert('Lỗi', 'Server không trả về JSON hợp lệ.');
-        return; // Dừng tại đây
+        return;
       }
 
-      // Nếu parse thành công => kiểm tra isSuccess
       if (data.isSuccess) {
         Alert.alert('Thông báo', 'Tài khoản đã được xác thực. Hãy đăng nhập lại.');
         setShowActiveModal(false); // đóng modal
@@ -158,21 +153,35 @@ const Login = ({ navigation, onLoginSuccess }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Đăng nhập</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Mật khẩu"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Button title="Login" onPress={handleLogin} />
+
+      {/* Ô nhập Email + Icon */}
+      <View style={styles.inputContainer}>
+        <Icon name="envelope" size={20} color="gray" style={styles.inputIcon} />
+        <TextInput
+          style={styles.inputField}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
+      </View>
+
+      {/* Ô nhập Mật khẩu + Icon */}
+      <View style={styles.inputContainer}>
+        <Icon name="lock" size={20} color="gray" style={styles.inputIcon} />
+        <TextInput
+          style={styles.inputField}
+          placeholder="Mật khẩu"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+      </View>
+
+      {/* Nút Login */}
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.loginButtonText}>Login</Text>
+      </TouchableOpacity>
 
       {/* Modal hỏi có muốn xác thực không */}
       <Modal
@@ -184,7 +193,7 @@ const Login = ({ navigation, onLoginSuccess }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Tài khoản chưa xác thực</Text>
-            <Text>
+            <Text style={styles.modalMessage}>
               Tài khoản này chưa được xác thực. Bạn có muốn xác thực ngay không?
             </Text>
             <View style={styles.buttonRow}>
@@ -215,12 +224,15 @@ const Login = ({ navigation, onLoginSuccess }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Nhập mã xác thực</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: '#fff' }]}
-              placeholder="Nhập mã xác thực"
-              value={verifyCode}
-              onChangeText={setVerifyCode}
-            />
+            <View style={styles.inputContainer}>
+              <Icon name="key" size={20} color="gray" style={styles.inputIcon} />
+              <TextInput
+                style={styles.inputField}
+                placeholder="Nhập mã xác thực"
+                value={verifyCode}
+                onChangeText={setVerifyCode}
+              />
+            </View>
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.button, { backgroundColor: 'gray' }]}
@@ -249,23 +261,54 @@ const Login = ({ navigation, onLoginSuccess }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
     justifyContent: 'center',
     backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 30,
     textAlign: 'center',
+    color: '#333',
   },
-  input: {
+  // Container chung cho mỗi ô input
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
   },
+  // Icon trong ô input
+  inputIcon: {
+    marginRight: 8,
+  },
+  // Field nhập liệu
+  inputField: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    color: '#333',
+  },
+  // Nút login
+  loginButton: {
+    backgroundColor: '#007BFF',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+
   // Modal styles
   modalContainer: {
     flex: 1,
@@ -274,30 +317,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    width: '80%',
+    width: '85%',
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
+    padding: 20,
+    borderRadius: 10,
     elevation: 5,
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 12,
+    color: '#333',
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 16,
+    textAlign: 'center',
   },
   buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     marginTop: 16,
   },
   button: {
-    borderRadius: 4,
+    borderRadius: 6,
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginLeft: 10,
   },
   buttonText: {
     color: '#fff',
+    fontSize: 16,
   },
 });
 
