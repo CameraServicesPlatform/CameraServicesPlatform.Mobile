@@ -117,11 +117,7 @@ const AccountDetails = ({ navigation }) => {
     <View style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
         <Text style={styles.title}>Thông tin Tài khoản</Text>
-        {img ? (
-          <Image source={{ uri: img }} style={styles.profileImage} />
-        ) : (
-          <Text style={styles.placeholderTextProImg}>Chưa có ảnh đại diện</Text>
-        )}
+        
          <Text style={styles.item}>
           <Text style={styles.label}>Họ: </Text>
           {firstName}
