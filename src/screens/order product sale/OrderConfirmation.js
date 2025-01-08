@@ -98,11 +98,7 @@ const OrderConfirmation = ({ route, navigation }) => { // Đảm bảo navigatio
         break;
     }
 
-    if (durationUnitValue === null) {
-      Alert.alert('Lỗi', 'Đơn vị thời gian không hợp lệ.');
-      setLoading(false);
-      return;
-    }
+    
 
     const reservationMoney = 0; // Nếu cần sử dụng reservationMoney từ API, hãy thêm logic tương ứng
 

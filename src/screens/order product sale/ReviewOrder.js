@@ -117,7 +117,7 @@ const ReviewOrder = ({ route, navigation }) => {
         </Text>
         <Text style={styles.itemText}>
           <Text style={styles.label}>Phương thức giao hàng: </Text>
-          {shippingMethod === 0 ? 'Nhận tại cửa hàng' : 'Giao hàng tận nơi'}
+          {shippingMethod === 0 ? 'Giao hàng tận nơi' : 'Nhận tại cửa hàng'}
         </Text>
         {shippingMethod === 1 && (
           <Text style={styles.itemText}>
