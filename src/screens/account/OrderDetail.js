@@ -9,6 +9,7 @@ const OrderDetail = ({ route }) => {
   const [error, setError] = useState(null);
   const [cancelMessage, setCancelMessage] = useState('');  // New state for cancel message
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [contractDetails, setContractDetails] = useState([]);
   const navigation = useNavigation();
 
   const fetchOrderDetail = async () => {
@@ -27,16 +28,31 @@ const OrderDetail = ({ route }) => {
     }
   };
 
+  const fetchContractDetails = async () => {
+    try {
+      const response = await fetch(`http://14.225.220.108:2602/contract/get-all-contracts-by-order-id?orderID=${orderID}`);
+      const data = await response.json();
+      if (data.isSuccess) {
+        setContractDetails(data.result.items || []);
+      } else {
+        throw new Error(data.messages || 'Failed to fetch contract details');
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
   useEffect(() => {
     fetchOrderDetail();
+    fetchContractDetails();  // Fetch contract details when the order details are loaded
   }, [orderID]);
 
   const reloadOrderDetails = () => {
     setLoading(true);
     setError(null);
     fetchOrderDetail();
+    fetchContractDetails();  // Reload contract details as well
   };
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -180,7 +196,14 @@ const OrderDetail = ({ route }) => {
       product: orderDetails[0],  // Example of passing product data
     });
   };
-
+  const toRoman = (num) => {
+    const romanNumerals = [
+      'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
+      'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX',
+      'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV', 'XXVI', 'XXVII', 'XXVIII', 'XXIX', 'XXX'
+    ];
+    return romanNumerals[num - 1] || num; 
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -206,16 +229,37 @@ const OrderDetail = ({ route }) => {
         <Text style={styles.subTitle}>Thông tin sản phẩm</Text>
         <Text style={styles.text}>Tên sản phẩm: {orderDetails[0]?.productName || "N/A"}</Text>
         <Text style={styles.text}>Mã sản phẩm: {orderDetails[0]?.serialNumber || "N/A"}</Text>
-        <Text style={styles.text}>Giá: {orderDetails[0]?.productPrice?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
+        {orderType === 0 && (
+          <Text style={styles.text}>Giá: {orderDetails[0]?.productPrice?.toLocaleString("vi-VN", {}) || "N/A"} vnđ</Text>
+        )}
         {orderType === 1 && (
           <>
-            <Text style={styles.text}>Tiền cọc: {deposit?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
-            <Text style={styles.text}>Giữ chỗ: {reservationMoney?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
+            <Text style={styles.text}>Tiền cọc: {deposit?.toLocaleString("vi-VN", {}) || "N/A"} vnđ</Text>
+            <Text style={styles.text}>Giữ chỗ: {reservationMoney?.toLocaleString("vi-VN", {}) || "N/A"} vnđ</Text>
           </>
         )}
         <Text style={styles.text}>Giảm giá: {orderDetails[0]?.discount || 0}%</Text>
       </View>
-      <Text style={styles.total}>Tổng cộng: {totalAmount?.toLocaleString("vi-VN", { }) || "N/A"} vnđ</Text>
+      {orderType === 1 && (
+      <View style={styles.productInfoSection}>
+        <Text style={styles.subTitle}>Thông tin hợp đồng</Text>
+        {contractDetails.length > 0 ? (
+          <ScrollView>
+            {contractDetails.map((contract, index) => (
+              <View key={index} style={styles.text}>
+                <Text style={styles.contractTitle}>{toRoman(index + 1)}.{contract.templateDetails}</Text>
+                <Text style={styles.contractText}> -{contract.contractTerms}</Text>
+                <Text style={styles.contractText}> -{contract.penaltyPolicy}</Text>
+                {/* Add other contract details as needed */}
+              </View>
+            ))}
+          </ScrollView>
+        ) : (
+          <Text style={styles.contractText}>Chưa có hợp đồng.</Text>
+        )}
+      </View>
+      )}
+      <Text style={styles.total}>Tổng cộng: {totalAmount?.toLocaleString("vi-VN", {}) || "N/A"} vnđ</Text>
       <View style={styles.buttonContainer}>
         {/* Extend rental button */}
         {orderType === 1 && (
@@ -246,13 +290,13 @@ const OrderDetail = ({ route }) => {
 
         {/* Cancel order button */}
         {orderStatus === 0 && (
-        <TouchableOpacity
-          style={[styles.button, styles.buttonCancel]}
-          onPress={() => setIsModalVisible(true)}
-        >
-          <Text style={styles.buttonText}>Hủy đơn hàng</Text>
-        </TouchableOpacity>
-                )}
+          <TouchableOpacity
+            style={[styles.button, styles.buttonCancel]}
+            onPress={() => setIsModalVisible(true)}
+          >
+            <Text style={styles.buttonText}>Hủy đơn hàng</Text>
+          </TouchableOpacity>
+        )}
       </View>
       <Modal visible={isModalVisible} transparent={true} animationType="slide">
         <View style={styles.modalContainer}>
@@ -277,14 +321,51 @@ const OrderDetail = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 16, textAlign: "center" },
-  orderSummary: { borderWidth: 2, padding: 15, marginBottom: 4 },
-  orderInfoSection: { backgroundColor: "#fff", padding: 16, borderRadius: 8, marginBottom: 16, elevation: 3 },
-  productInfoSection: { backgroundColor: "#fff", padding: 16, borderRadius: 8, marginBottom: 16, elevation: 3 },
-  text: { fontSize: 17, marginBottom: 8 },
-  text1: { fontSize: 16, marginBottom: 4, textAlign: "center" },
-  subTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 8, textAlign: "center" },
+  container: { 
+    flex: 1, 
+    padding: 16,
+     backgroundColor: "#f9f9f9" 
+    },
+  title: { 
+    fontSize: 20, 
+    fontWeight: "bold", 
+    marginBottom: 16, 
+    textAlign: "center" 
+  },
+  orderSummary: { 
+    borderWidth: 2, 
+    padding: 15, 
+    marginBottom: 4 
+  },
+  orderInfoSection: { 
+    backgroundColor: "#fff", 
+    padding: 16, 
+    borderRadius: 8, 
+    marginBottom: 16, 
+    elevation: 3 
+  },
+  productInfoSection: { 
+    backgroundColor: "#fff", 
+    padding: 16, 
+    borderRadius: 8, 
+    marginBottom: 16, 
+    elevation: 3 
+  },
+  text: { 
+    fontSize: 17, 
+    marginBottom: 8 
+  },
+  text1: { 
+    fontSize: 16, 
+    marginBottom: 4, 
+    textAlign: "center" 
+  },
+  subTitle: { 
+    fontSize: 18, 
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center" 
+  },
   total: { fontSize: 18, fontWeight: "bold", textAlign: "center", marginVertical: 16 },
   buttonContainer: {
     flexDirection: 'column',
@@ -346,6 +427,20 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  contractSection: {
+    marginBottom: 16,
+  },
+  contractTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  contractItem: {
+    marginBottom: 12,
+  },
+  contractText: {
+    fontSize: 16,
+    marginLeft: 16,
   },
 });
 
