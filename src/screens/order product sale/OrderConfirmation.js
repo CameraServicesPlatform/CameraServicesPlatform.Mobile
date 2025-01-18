@@ -144,8 +144,8 @@ const OrderConfirmation = ({ route, navigation }) => { // Đảm bảo navigatio
         await AsyncStorage.setItem('savedData', JSON.stringify(updatedData));
 
         Alert.alert(
-          'Thành công',
-          'Xin cảm ơn!!!',
+          'Xin cảm ơn',
+          'Đơn hàng đã tạo thành công!!!',
           [
             {
               text: 'OK',

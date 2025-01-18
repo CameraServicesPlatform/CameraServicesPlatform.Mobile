@@ -16,13 +16,17 @@ import * as ImagePicker from 'expo-image-picker';
 const UpdateAccount = ({ route, navigation }) => {
     const { accountID, accountDetails } = route.params;
 
+    const defaultJob = 0; // Giá trị đầu tiên trong Picker nghề nghiệp
+    const defaultHobby = 0; // Giá trị đầu tiên trong Picker sở thích
+    const defaultGender = 3; // Giá trị đầu tiên trong Picker giới tính
+
     const [email, setEmail] = useState(accountDetails?.email || '');
     const [firstName, setFirstName] = useState(accountDetails?.firstName || '');
     const [lastName, setLastName] = useState(accountDetails?.lastName || '');
     const [phoneNumber, setPhoneNumber] = useState(accountDetails?.phoneNumber || '');
-    const [job, setJob] = useState(accountDetails?.job ?? null);
-    const [hobby, setHobby] = useState(accountDetails?.hobby ?? null);
-    const [gender, setGender] = useState(accountDetails?.gender ?? 0);
+    const [job, setJob] = useState(accountDetails?.job ?? defaultJob); // Sử dụng giá trị mặc định nếu null
+    const [hobby, setHobby] = useState(accountDetails?.hobby ?? defaultHobby); // Sử dụng giá trị mặc định nếu null
+    const [gender, setGender] = useState(accountDetails?.gender ?? defaultGender); // Sử dụng giá trị mặc định nếu null
     const [bankName, setBankName] = useState(accountDetails?.bankName || '');
     const [accountNumber, setAccountNumber] = useState(accountDetails?.accountNumber || '');
     const [accountHolder, setAccountHolder] = useState(accountDetails?.accountHolder || '');
